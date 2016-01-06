@@ -34,7 +34,7 @@ class TestMiddleware(object):
         #     request.headers['Proxy-Authorization'] = basic_auth
 
     def process_exception(self, request, exception, spider):
-        #print '### TestMiddleware process_exception'+str(exception)
+        print '### TestMiddleware process_exception'+str(exception)
         # proxy = request.meta['proxy']
         # log.msg('Removing failed proxy <%s>, %d proxies left' % (
         #             proxy, len(self.proxies)))
