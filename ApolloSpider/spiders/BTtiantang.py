@@ -25,7 +25,7 @@ class BTtiantangSpider(BaseSpider):
     FULL_SPIDER = False
     complete    = False
     fin_page    = 0
-    clkimbpage  = 0
+    climbpage  = 0
 
     def __init__(self, category=None, *args, **kwargs):
         logging_start(self.name)
