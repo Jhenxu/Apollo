@@ -16,7 +16,7 @@ from . import logging_start
 
 class BTtiantangSpider(BaseSpider):
     pipeline = set([
-        'Apollo.pipelines.TorrentPipeline.TorrentPipeline',
+        'ApolloSpider.pipelines.TorrentPipeline.TorrentPipeline',
     ])
 
     name        = 'BTtiantang'

@@ -136,6 +136,8 @@ class MongodbPipeline(object):
                 if r:
                     detail['douban_item'] = r['_id']
             result = _db.insert(detail)
+            if len(item.get('torrents',[])) == 0:
+                log.msg('未获取种子:'+str(item['title'].encode('utf-8')),level=log.WARNING)
             log.msg('插入新条目:'+str(item['title'].encode('utf-8')),level=log.INFO)
         return item
 
