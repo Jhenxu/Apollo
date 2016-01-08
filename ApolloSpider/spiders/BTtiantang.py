@@ -199,7 +199,6 @@ class BTtiantangSpider(BaseSpider):
                 'Pragma':'no-cache',
                 'Cache-Control':'no-cache',
                 'Origin':'http://www.bttiantang.com',
-                'Upgrade-Insecure-Requests':1,
                 'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36',
                 'Content-Type':'application/x-www-form-urlencoded',
                 'Accept-Encoding':'gzip, deflate',
