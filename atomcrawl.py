@@ -30,14 +30,14 @@ def scheduler():
 
 def getDeltaSecs():
     x=datetime.today()
-    y=x.replace(day=x.day+1, hour=12, minute=0, second=0, microsecond=0)
+    y=x.replace(day=x.day+1, hour=3, minute=0, second=0, microsecond=0)
     #y=x.replace(day=x.day, hour=x.hour, minute=x.minute+1, second=x.second, microsecond=x.microsecond)
     delta_t=y-x
     secs=delta_t.seconds+1
     return secs
 
 def job():
-    print bcolors.HEADER+('Start scrawl job..... %s' % time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(time.time()))))+bcolors.ENDC 
+    print bcolors.HEADER+('Start scrawl job..... %s' % time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(time.time()))))+bcolors.ENDC
     command = 'scrapy crawl BTtiantang&&scrapy crawl Douban'
     subprocess.call(command,shell=True)
     print bcolors.OKBLUE+'Finish do command.'+bcolors.ENDC
@@ -45,4 +45,4 @@ def job():
 if __name__=='__main__':
     scheduler()
 
-
+#nohup python atomcrawl.py >/dev/null 2>&1 &
