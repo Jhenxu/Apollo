@@ -62,3 +62,5 @@ def sync_locale_store():
                 db.update({'_id':item['_id']},{'$set':{'douban_item':result}})
                 print '   更新Item '+item['_id'].encode('utf-8')
             print '插入Item '+d['key'].encode('utf-8')
+
+#nohup scrapy crawl BTtiantang >/dev/null 2>&1 &
