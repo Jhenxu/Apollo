@@ -48,15 +48,17 @@ def sync_locale_store():
     if not os.path.isfile(_backup_file):
         raise Exception('备份文件不存在.')
 
+    client = MongoClient('localhost',27017)
+    db = client['apollo_db']['apollo_item']
+
     for line in open(_backup_file,'r').readlines():
         d = eval(line)
         c = db.find({'platform':d['platform'],'key':d['key']}).count()
         if c > 0:
-            print '本地数据库已经存在 '+d['key']
+            print '本地数据库已经存在 '+d['key'].encode('utf-8')
         else:
             result = db.insert(d)
             for item in db.find({'douban_item':{'$exists':False},'douban_id':d['key']}):
                 db.update({'_id':item['_id']},{'$set':{'douban_item':result}})
-
-    client = MongoClient('localhost',27017)
-    db = client['apollo_db']['apollo_item']
+                print '   更新Item '+item['_id'].encode('utf-8')
+            print '插入Item '+d['key'].encode('utf-8')
