@@ -40,8 +40,8 @@ IMAGES_THUMBS = {
     'mobile': (320, 320),
 }
 
-# DOWNLOAD_DELAY = 0.5
-# DOWNLOAD_TIMEOUT = 5
+DOWNLOAD_DELAY = 0.5
+DOWNLOAD_TIMEOUT = 10
 
 IMAGES_STORE = './images/'
 IMAGES_EXPIRES = 180        #根据lastmodify
