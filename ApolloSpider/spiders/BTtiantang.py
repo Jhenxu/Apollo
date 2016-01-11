@@ -11,7 +11,8 @@ from scrapy import log
 from scrapy.spider import BaseSpider
 from scrapy.http import Request,FormRequest
 from ApolloSpider.items import ApolloItem
-from ApolloSpider.utils.mongodb import MongoAgentFactory as Agent
+from ApolloCommon.mongodb import MongoAgentFactory as Agent
+from ApolloCommon import config
 from . import logging_start
 
 class BTtiantangSpider(BaseSpider):
@@ -37,7 +38,7 @@ class BTtiantangSpider(BaseSpider):
         self.SPIDER_EXPIRED_DAYS = crawler.settings.getint('APOLLO_FULL_SPIDER',0)
 
     def parse(self,response):
-        self.spider_item = Agent.getAgent().db[Agent.MONGODB_SPIDER].find_one(\
+        self.spider_item = Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].find_one(\
                 {'platform':self.name},fields=['lastime','endpage'])
 
         _end_regex = '<li><a href=\'/\?PageNo=(\d*?)\'>末页</a></li>'
@@ -128,7 +129,7 @@ class BTtiantangSpider(BaseSpider):
         if p:
             _item['img_ore'] = p.group('url')
 
-        dbItem = Agent.getAgent().db[Agent.MONGODB_ITEM].find_one(\
+        dbItem = Agent.getAgent().db[config.get('MONGODB_ITEM','apollo_item')].find_one(\
                 {'key':_item.getKey()},fields=['douban_id','timestamp','torrents_size','years'])
         _item['meta']['dbItem'] = dbItem
 
@@ -241,11 +242,11 @@ class BTtiantangSpider(BaseSpider):
                 item['platform'] = self.name
                 item['lastime'] = time.time()
                 item['endpage'] = self._end_page
-                Agent.getAgent().db[Agent.MONGODB_SPIDER].insert(item)
+                Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].insert(item)
                 log.msg('更新SpiderItem.[%s]'%str(item),level=log.INFO)
             else:
                 self.spider_item['lastime'] = time.time()
                 mogon_id = self.spider_item['_id']
                 del self.spider_item['_id']
-                Agent.getAgent().db[Agent.MONGODB_SPIDER].update({'_id':mogon_id},{'$set':self.spider_item})
+                Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].update({'_id':mogon_id},{'$set':self.spider_item})
                 log.msg('更新SpiderItem.[%s]'%str(self.spider_item),level=log.INFO)

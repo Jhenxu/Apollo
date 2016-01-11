@@ -13,7 +13,8 @@ from scrapy.http import Request
 from scrapy.exceptions import CloseSpider
 from ApolloSpider.items import DoubanItem
 from scrapy.contrib.spidermiddleware.httperror import HttpError
-from ApolloSpider.utils.mongodb import MongoAgentFactory as Agent
+from ApolloCommon.mongodb import MongoAgentFactory as Agent
+from ApolloCommon import config
 from . import logging_start
 
 class DoubanSpider(BaseSpider):
@@ -29,8 +30,8 @@ class DoubanSpider(BaseSpider):
         crawler.settings.overrides['RANDOMIZE_DOWNLOAD_DELAY'] = True
 
     def start_requests(self):
-        db = Agent.getAgent().db[Agent.MONGODB_ITEM]
-        banlist = [item['id'] for item in Agent.getAgent().db[Agent.MONGODB_SPIDER].find({'platform':self.name,'action':'movie_not_found'})]
+        db = Agent.getAgent().db[config.get('MONGODB_ITEM','apollo_item')]
+        banlist = [item['id'] for item in Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].find({'platform':self.name,'action':'movie_not_found'})]
 
         for item in db.find({'douban_item':{'$exists':False},'douban_id':{'$exists':True}},fields=['douban_id','_id']):
             if not item['douban_id'] == None and not '' == item['douban_id'] and not '0' == item['douban_id']:
@@ -111,7 +112,7 @@ class DoubanSpider(BaseSpider):
                             item['platform'] = self.name
                             item['action'] = 'movie_not_found'
                             item['id'] = _id
-                            Agent.getAgent().db[Agent.MONGODB_SPIDER].insert(item)
+                            Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].insert(item)
                         log.msg('%s %s'%(jitem['code'],jitem['msg'].encode('utf-8','ignore')),level=log.ERROR)
                     else:
                         log.msg('发生错误：%s %s'%(jitem['code'],jitem['msg'].encode('utf-8','ignore')),level=log.ERROR)

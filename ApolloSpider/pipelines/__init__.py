@@ -11,7 +11,8 @@ import functools
 from scrapy import Request,log
 from scrapy.contrib.pipeline.images import ImagesPipeline
 from ApolloSpider.items import ApolloItem,DoubanItem
-from ApolloSpider.utils.mongodb import MongoAgentFactory
+from ApolloCommon.mongodb import MongoAgentFactory
+from ApolloCommon import config
 from ApolloSpider.utils import isFileExpire
 
 #标注的Pipeline.process_item方法将校验是否在spider.pipeline中定义，定义了
@@ -114,7 +115,7 @@ class MongodbPipeline(object):
             return self._process_douban(item,spider)
 
     def _process_apollo(self,item,spider):
-        _db = self.db[MongoAgentFactory.MONGODB_ITEM]
+        _db = self.db[config.get('MONGODB_ITEM','apollo_item')]
         dbItem = _db.find_one({'key':item.getKey()},fields=['torrents','torrents_size'])
         if not dbItem == None:
             if len(item.get('torrents',[])) > 0:
@@ -142,7 +143,7 @@ class MongodbPipeline(object):
         return item
 
     def _process_douban(self,item,spider):
-        _db = self.db[MongoAgentFactory.MONGODB_ITEM]
+        _db = self.db[config.get('MONGODB_ITEM','apollo_item')]
         dbItem = _db.find_one({'key':item['key']})
 
         def update_apollo_item(result):

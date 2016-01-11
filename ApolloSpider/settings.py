@@ -32,7 +32,6 @@ DOWNLOADER_MIDDLEWARES = {
 }
 
 EXTENSIONS = {
-        'ApolloSpider.utils.mongodb.MongoAgentFactory':100,
         }
 
 IMAGES_THUMBS = {
@@ -50,12 +49,6 @@ TORRENT_EXPIRES = 180       #根据lastmodify
 FILE_EXPIRES = -1           #根据文件修改日期IMAGES TORRENT 0:过期 -1:不过期
 APOLLO_ITEM_DEEP_SPIDER = 7      #深度爬取时间间隔（已经存在的item再次深度爬取）
 APOLLO_FULL_SPIDER = 30
-
-MONGODB_SERVER = 'localhost'
-MONGODB_PORT = 27017
-MONGODB_DB = 'apollo_db'
-MONGODB_ITEM = 'apollo_item'
-MONGODB_SPIDER = 'apollo_spider'
 
 # # RandomProxy Retry many times since proxies often fail
 # RETRY_TIMES = 10
