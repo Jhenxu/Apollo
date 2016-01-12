@@ -42,9 +42,9 @@ IMAGES_THUMBS = {
 DOWNLOAD_DELAY = 0.5
 DOWNLOAD_TIMEOUT = 10
 
-IMAGES_STORE = './images/'
+IMAGES_STORE = './static/images/'
 IMAGES_EXPIRES = 180        #根据lastmodify
-TORRENTS_STORE = './torrents/'
+TORRENTS_STORE = './static/torrents/'
 TORRENT_EXPIRES = 180       #根据lastmodify
 FILE_EXPIRES = -1           #根据文件修改日期IMAGES TORRENT 0:过期 -1:不过期
 APOLLO_ITEM_DEEP_SPIDER = 7      #深度爬取时间间隔（已经存在的item再次深度爬取）
