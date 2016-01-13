@@ -7,6 +7,7 @@
 #
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
+from ApolloCommon import config
 
 BOT_NAME = 'ApolloSpider'
 
@@ -42,9 +43,9 @@ IMAGES_THUMBS = {
 DOWNLOAD_DELAY = 0.5
 DOWNLOAD_TIMEOUT = 10
 
-IMAGES_STORE = './static/images/'
+IMAGES_STORE = config.get('IMAGES_STORE')
 IMAGES_EXPIRES = 180        #根据lastmodify
-TORRENTS_STORE = './static/torrents/'
+TORRENTS_STORE = config.get('TORRENTS_STORE')
 TORRENT_EXPIRES = 180       #根据lastmodify
 FILE_EXPIRES = -1           #根据文件修改日期IMAGES TORRENT 0:过期 -1:不过期
 APOLLO_ITEM_DEEP_SPIDER = 7      #深度爬取时间间隔（已经存在的item再次深度爬取）
