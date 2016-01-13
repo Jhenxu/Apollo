@@ -6,6 +6,7 @@
 # mail: jhenxu@gmail.com
 # Created Time: 2016-01-11 17:43:40
 #########################################################################
+import json
 from ApolloCommon.mongodb import MongoAgentFactory
 from ApolloCommon import config,class_for_name
 from bson.objectid import ObjectId
@@ -54,22 +55,67 @@ class BaseCardManager(object):
             r['timestamp'] = item['timestamp']
             r['summary'] = ''
             r['tags'] = item['tags']
+            r['alias'] = item['alias']
+            r['directors'] = []
+            r['starring'] = []
+            r['banid'] = item['douban_id']
+            r['mid'] = str(item['_id'])
+            r['imdb'] = item['imdb']
+
             if 'douban_detail' in item:
                 _dou_item = item['douban_detail']
                 r['rating_score'] = _dou_item['rating_score']
                 if 'img' in _dou_item and len(_dou_item['img'])>0:
                     r['img'] = '/%s/thumbs/mobile/%s'%(_dou_item['platform'],_dou_item['img'])
                 r['summary'] = _dou_item['summary']
+
+                info = json.loads(_dou_item['content'])
+
+                def _assemble_star(item):
+                    result = {}
+                    result['name'] = item['name']
+                    if 'avatars' in item and item['avatars'] and 'medium' in item['avatars']:
+                        result['avatar'] = item['avatars']['medium']
+                    else:
+                        result['avatar'] = ''
+                    result['id'] = item['id']
+                    return result
+
+                for i in info['directors']:
+                    r['directors'].append(_assemble_star(i))
+
+                for i in info['casts']:
+                    r['starring'].append(_assemble_star(i))
+
+                if 'genres' in info:
+                    r['tags'] = info['genres']
+
+                if 'aka' in info:
+                    r['alias'] = info['aka']
             else:
                 if 'img' in item and len(item['img'])>0:
                     r['img'] = '/%s/thumbs/mobile/%s'%(item['platform'],item['img'])
+
+                def _assemble_star(item):
+                    result = {}
+                    result['name'] = item
+                    result['avatar'] = ''
+                    result['id'] = ''
+                    return result
+
+                for i in item['director']:
+                    r['directors'].append(_assemble_star(i))
+
+                for i in item['starring']:
+                    r['directors'].append(_assemble_star(i))
+
             if not 'img' in r:
                 r['img'] = ''
 
-            r['torrents'] = []
-            for t in item['torrents']:
-                if len(t) > 0:
-                    r['torrents'].append(t)
+            # r['torrents'] = []
+            # for t in item['torrents']:
+            #     if len(t) > 0:
+            #         r['torrents'].append(t)
             return r
 
         result = []
