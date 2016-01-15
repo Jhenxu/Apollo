@@ -12,22 +12,23 @@ from ApolloCommon import config,class_for_name
 from bson.objectid import ObjectId
 
 _app_cards_info = ('ApolloCards.managers','AppCardsManager')
-CARDS_CONF = {
-    'newest_mov':(_app_cards_info,'newest'),
-    'act_mov':(_app_cards_info,'action_movie'),
-    'comedy_mov':(_app_cards_info,'comedy_movie'),
-    'drama_mov':(_app_cards_info,'drama_movie'),
-    'top_mov':(_app_cards_info,'top_movie'),
+_cards_info = {
+    'card_main_0001':(_app_cards_info,'newest'),
+    'card_main_0002':(_app_cards_info,'action_movie'),
+    'card_main_0003':(_app_cards_info,'comedy_movie'),
+    'card_main_0004':(_app_cards_info,'drama_movie'),
+    'card_main_0005':(_app_cards_info,'top_movie'),
     }
 
-
 def card_method(key):
-    t = CARDS_CONF.get(key)
-    mod_name = t[0][0]
-    cls_name = t[0][1]
-    mgr = class_for_name(mod_name,cls_name)
-    fuc = t[1]
-    return getattr(mgr,fuc)
+    if key in _cards_info:
+        t = _cards_info.get(key)
+        mod_name = t[0][0]
+        cls_name = t[0][1]
+        mgr = class_for_name(mod_name,cls_name)
+        fuc = t[1]
+        return getattr(mgr,fuc)
+    return None
 
 class BaseCardManager(object):
 
@@ -65,11 +66,14 @@ class BaseCardManager(object):
             if 'douban_detail' in item:
                 _dou_item = item['douban_detail']
                 r['rating_score'] = _dou_item['rating_score']
-                if 'img' in _dou_item and len(_dou_item['img'])>0:
-                    r['img'] = '/%s/thumbs/mobile/%s'%(_dou_item['platform'],_dou_item['img'])
+                # if 'img' in _dou_item and len(_dou_item['img'])>0:
+                #     r['img'] = '/%s/thumbs/mobile/%s'%(_dou_item['platform'],_dou_item['img'])
                 r['summary'] = _dou_item['summary']
 
                 info = json.loads(_dou_item['content'])
+
+                if 'images' in info and info['images'] and 'medium' in info['images']:
+                    r['img'] = info['images']['medium']
 
                 def _assemble_star(item):
                     result = {}

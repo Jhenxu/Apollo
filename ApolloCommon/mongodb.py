@@ -36,3 +36,7 @@ class MongoAgentFactory(object):
     @staticmethod
     def getAgent():
         return MongoAgent()
+        
+    @staticmethod
+    def getDB():
+        return MongoAgent().db[config.get('MONGODB_ITEM','apollo_item')]
