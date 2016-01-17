@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{%block loader_silde_bar %}
+{% for url,side_name,infos in sidebar_items %}
+<li>
+    <a href="../../scan/{{url}}" {% if infos.selected %} class="active" {% endif %}><i class="fa {{infos.icon}} fa-fw"></i> {{ side_name }}</a>
+</li>
+{% endfor %}
+{% endblock %}
