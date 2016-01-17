@@ -20,7 +20,7 @@
   <div class="col-lg-12">
       <div class="panel panel-default">
           <div class="panel-heading">
-              DataTables Advanced Tables
+              DataTables Logs Tables
           </div>
           <!-- /.panel-heading -->
           <div class="panel-body">
@@ -135,7 +135,7 @@ function showlog(file) {
         'action': 'getlog',
         'file': file,
     },
-    async : false,
+    async : true,
     success:function(data) {
       document.getElementById('frame_content').contentWindow.document.open()
       document.getElementById('frame_content').contentWindow.document.write(JSON.stringify(data));

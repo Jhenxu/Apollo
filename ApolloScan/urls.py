@@ -10,7 +10,7 @@
 from django.conf.urls import patterns, include, url
 
 side_info = [
-    (r'','apollo_logs','日志',{'icon':'fa-dashboard'}),
+    (r'','apollo_logs','Logs',{'icon':'fa-dashboard'}),
     # (r'test1/','test1','Test1',{'icon':'fa-bar-chart-o'}),
     # (r'test2/','test2','Test2',{'icon':'fa-table'}),
 ]
