@@ -11,8 +11,8 @@ from django.conf.urls import patterns, include, url
 
 side_info = [
     (r'','apollo_logs','日志',{'icon':'fa-dashboard'}),
-    (r'test1/','test1','Test1',{'icon':'fa-bar-chart-o'}),
-    (r'test2/','test2','Test2',{'icon':'fa-table'}),
+    # (r'test1/','test1','Test1',{'icon':'fa-bar-chart-o'}),
+    # (r'test2/','test2','Test2',{'icon':'fa-table'}),
 ]
 
 side_pattern_tuples = [(r'^'+url+'$',view,{'title':title

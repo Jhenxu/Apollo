@@ -31,27 +31,23 @@ def requestWrap(call_method):
 
 @requestWrap
 def apollo_logs(request,sideinfo,title):
-    sidebar = [(url,title,infos) for (url,method,title,infos) in sideinfo]
     data = {}
     data['title'] = title
-    data['sidebar_items'] = sidebar
-
+    data['sidebar_items'] = [(url,title,infos) for (url,method,title,infos) in sideinfo]
     return render_to_response('log.html',data)
 
 @requestWrap
 def test1(request,sideinfo,title):
-    sidebar = [(url,title,infos) for (url,method,title,infos) in sideinfo]
     data = {}
-    data['sidebar_items'] = sidebar
-
+    data['title'] = title
+    data['sidebar_items'] = [(url,title,infos) for (url,method,title,infos) in sideinfo]
     return render_to_response('scan_page.html',data)
 
 @requestWrap
 def test2(request,sideinfo,title):
-    sidebar = [(url,title,infos) for (url,method,title,infos) in sideinfo]
     data = {}
-    data['sidebar_items'] = sidebar
-
+    data['title'] = title
+    data['sidebar_items'] = [(url,title,infos) for (url,method,title,infos) in sideinfo]
     return render_to_response('scan_page.html',data)
 
 def api_data(request):
