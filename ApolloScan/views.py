@@ -10,6 +10,8 @@ import json
 import functools
 import os
 import re
+import time
+import datetime
 from django.http import HttpResponse
 from django.shortcuts import render,render_to_response
 
@@ -57,8 +59,20 @@ def api_data(request):
         _file_path = os.path.join(_log_dir, request.GET.get('file',''))
         _file = open(_file_path,'r')
         data =  _file.read()
+        # _regex_scrapy_stat = r'Dumping Scrapy stats:\n\t(?P<stat>{[\s\S]*?})'
+        # f = re.search(_regex_scrapy_stat,data)
+        # if f:
+        #     stat = eval(f.group('stat').replace('\n','').replace('\t',''))
+        #     #print (stat['finish_time'] - stat['start_timme']).total_seconds()
+        #     dur = time.mktime(stat['finish_time'].timetuple()) -time.mktime(stat['start_time'].timetuple())
+        #     print dur
+        #     print type(stat['start_time'])
 
-        return HttpResponse(data.replace('\n','</br>').replace('\t','&nbsp;&nbsp;&nbsp'), content_type="text/plain")
+
+        htmldata = data.replace('\n','</br>').replace('\t','&nbsp;&nbsp;&nbsp')
+        #t = '<html lang="utf-8"><head></head><body><div style="font-size:100px">a</p>a</p>a</p></div></body></html>'
+
+        return HttpResponse(htmldata, content_type="text/plain")
     elif 'loglist' == action:
         result = {}
         data = []
@@ -82,8 +96,11 @@ def api_data(request):
                 m = re.match(_regex,_file_name)
                 item = {}
                 if m:
-                    item['date'] = m.group('date')
-                    item['time'] = m.group('time')
+                    _file_path = os.path.join(_log_dir, _file_name)
+                    _file_stat = os.stat(_file_path)
+                    format_time = m.group('date') + ' ' +m.group('time')
+                    item['file_size'] = _file_stat.st_size
+                    item['time'] = format_time
                     item['file'] = _file_name
                     item['platform'] = m.group('platform')
                     data.append(item)
