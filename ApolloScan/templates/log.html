@@ -12,7 +12,10 @@
 <style>
 .div-relative{position:relative; color:#000; border:1px solid #000; width:100%; height:400px}
 .div-a{ position:absolute; width:100%; height:100%}
-.div-b{ position:absolute; visibility:hidden;background-color:rgba(0, 0, 0, 0.3); width:100%; height:100%}
+.div-b{ position:absolute; display: none; background-color:rgba(0, 0, 0, 0.3); width:100%; height:100%}
+.table-nonfluid {
+   width: auto !important;
+}
 .spinner {
   width: 80px;
   height: 80px;
@@ -63,19 +66,22 @@
               <div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
                 <div class="dataTables_length" id="dataTables-example_length">
                 <!-- <button id="redraw" style="width: 50px;height: 25px">刷新</button> -->
-                <table class="table table-striped table-bordered table-hover dataTable no-footer" id="dataTables-example" role="grid">
-                 <thead>
-                  <tr role="row">
-                      <th>Number</th>
-                      <th>Time</th>
-                      <th>File</th>
-                      <th>Platform</th>
-                      <th>Size</th>
-                  </tr>
-                 </thead>
-                 <tbody></tbody>
-                 <!-- tbody是必须的 -->
-                </table>
+                <div class="col-sm-12">
+                  <table class="table table-striped table-bordered table-hover dataTable no-footer" id="dataTables-example" role="grid" width="100%">
+                   <thead>
+                    <tr role="row">
+                        <th>Number</th>
+                        <th>Time</th>
+                        <th>File</th>
+                        <th>Platform</th>
+                        <th>Size</th>
+                    </tr>
+                   </thead>
+                   <tbody></tbody>
+                   <!-- tbody是必须的 -->
+                 </table>
+               </div>
+
               </div>
             </div>
           </div>
@@ -172,7 +178,7 @@ function() {
 
 //显示内容
 function showlog(file) {
-  document.getElementById('frame_progress').style.visibility = "visible"
+  $('#frame_progress').show()
   $.ajax( {
     url:'../../scan/api/?action=',// 跳转到 action
     data: {
@@ -184,13 +190,13 @@ function showlog(file) {
       document.getElementById('frame_content').contentWindow.document.open()
       document.getElementById('frame_content').contentWindow.document.write(JSON.stringify(data));
       document.getElementById('frame_content').contentWindow.document.close()
-      document.getElementById('frame_progress').style.visibility = "hidden"
+      $('#frame_progress').hide("fast")
     },
     error : function() {
       document.getElementById('frame_content').contentWindow.document.open()
       document.getElementById('frame_content').contentWindow.document.write('发生错误！');
       document.getElementById('frame_content').contentWindow.document.close()
-      document.getElementById('frame_progress').style.visibility = "hidden"
+      $('#frame_progress').hide("fast")
     }
     });
 };
