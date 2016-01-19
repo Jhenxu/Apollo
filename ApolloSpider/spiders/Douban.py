@@ -44,9 +44,15 @@ class DoubanSpider(BaseSpider):
                 else:
                     log.msg('Ban douban id:'+item['douban_id'],level=log.DEBUG)
 
-        def _reparse_douban(update_time,ratings_count,year):
+        def _reparse_douban(update_time,ratings_count,year,retries):
             diffts = time.time()-update_time
             year_anchor = int(time.strftime("%Y", time.localtime(time.time()))) - year+1
+            max_rc = 20/year_anchor
+            if max_rc < 5:
+                max_rc = 5
+            if retries > max_rc:
+                return False
+
             anchor = 24*60*60*year_anchor
             if ratings_count < 100:
                return diffts > 3*anchor
@@ -58,8 +64,11 @@ class DoubanSpider(BaseSpider):
                return diffts > 15*anchor
 
         reparseitems = []
-        for item in db.find({'platform':self.name},fields=['ratings_count','year','update','key']):
-            if _reparse_douban(item['update'],item['ratings_count'],item['year']):
+        for item in db.find({'platform':self.name},fields=['ratings_count','year','update','key','retries']):
+            rc = 0
+            if 'retries' in item:
+                rc = item['retries']
+            if _reparse_douban(item['update'],item['ratings_count'],item['year'],rc):
                 if not item['key'] in banlist:
                     reparseitems.append(item['key'])
                     log.msg('重新爬取DoubanItem:'+str(item['key']),level=log.DEBUG)

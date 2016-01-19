@@ -152,7 +152,13 @@ class MongodbPipeline(object):
                 log.msg('更新条目:'+str(item['apollo_item']),level=log.INFO)
 
         if not dbItem == None:
-            result = _db.update({'_id':dbItem['_id']},{'$set':item.toDBItem()})
+            data = item.toDBItem()
+            if 'retries' in dbItem:
+                data['retries'] = dbItem['retries'] + 1
+            else:
+                data['retries'] = 1
+                
+            result = _db.update({'_id':dbItem['_id']},{'$set':data})
             update_apollo_item(result)
             log.msg('更新Douban条目:'+str(item['key'].encode('utf-8')),level=log.INFO)
         else:

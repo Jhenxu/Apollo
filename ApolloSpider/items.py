@@ -129,5 +129,6 @@ class DoubanItem(Item):
                 'content':self.get('content',''),
                 'img':self.get('img',''),
                 'update':time.time(),
+                'retries':0,
                 }
         return result
