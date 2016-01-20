@@ -15,6 +15,7 @@ config['MONGODB_PORT'] = 27017
 config['MONGODB_DB'] = 'apollo_db'
 config['MONGODB_ITEM'] = 'apollo_item'
 config['MONGODB_SPIDER'] = 'apollo_spider'
+config['MONGODB_LOG'] = 'apollo_log'
 config['IMAGES_STORE'] = './static/images/'
 config['TORRENTS_STORE'] = './static/torrents/'
 

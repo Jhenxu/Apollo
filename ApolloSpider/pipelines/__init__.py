@@ -101,6 +101,16 @@ class ApolloImagePipline(ImagesPipeline):
         item['img'] = path
         return item
 
+    def media_failed(self, failure, request, info):
+        _key = 'image_failed'
+        info.spider.crawler.stats.inc_value(_key)
+        return super(ApolloImagePipline,self).media_failed(failure,request,info)
+
+    def media_downloaded(self, response, request, info):
+        _key = 'image_downloaded'
+        info.spider.crawler.stats.inc_value(_key)
+        return super(ApolloImagePipline,self).media_downloaded(response,request,info)
+
 class MongodbPipeline(object):
     def __init__(self):
         self.db = MongoAgentFactory.getAgent().db
@@ -126,6 +136,10 @@ class MongodbPipeline(object):
                         ,'torrents_size':len(dbItem.get('torrent',[]))\
                         ,'timestamp':time.time()}
                 result = _db.update({'_id':dbItem['_id']},{'$set':update_dict})
+
+                _key = 'db_update_count'
+                spider.crawler.stats.inc_value(_key)
+
                 log.msg('更新条目:'+str(item['title'].encode('utf-8')),level=log.DEBUG)
             else:
                 log.msg('已经是最新的条目:'+str(item['title'].encode('utf-8')),level=log.DEBUG)
@@ -140,6 +154,9 @@ class MongodbPipeline(object):
             if len(item.get('torrents',[])) == 0:
                 log.msg('未获取种子:'+str(item['title'].encode('utf-8')),level=log.WARNING)
             log.msg('插入新条目:'+str(item['title'].encode('utf-8')),level=log.INFO)
+
+            _key = 'db_insert_count'
+            spider.crawler.stats.inc_value(_key)
         return item
 
     def _process_douban(self,item,spider):
@@ -151,18 +168,25 @@ class MongodbPipeline(object):
                 _db.update({'_id':item['apollo_item']},{'$set':{'douban_item':result}})
                 log.msg('更新条目:'+str(item['apollo_item']),level=log.INFO)
 
+
         if not dbItem == None:
             data = item.toDBItem()
             if 'retries' in dbItem:
                 data['retries'] = dbItem['retries'] + 1
             else:
                 data['retries'] = 1
-                
+
             result = _db.update({'_id':dbItem['_id']},{'$set':data})
             update_apollo_item(result)
             log.msg('更新Douban条目:'+str(item['key'].encode('utf-8')),level=log.INFO)
+
+            _key = 'db_update_count'
+            spider.crawler.stats.inc_value(_key)
         else:
             result = _db.insert(item.toDBItem())
             update_apollo_item(result)
             log.msg('插入新Douban条目:'+str(item['key'].encode('utf-8')),level=log.INFO)
+
+            _key = 'db_insert_count'
+            spider.crawler.stats.inc_value(_key)
         return item

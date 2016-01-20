@@ -71,9 +71,13 @@ class TorrentPipeline(FilesPipeline):
         return super(TorrentPipeline,self).media_to_download(request,info)
 
     def media_failed(self, failure, request, info):
+        _key = 'torrents_failed'
+        info.spider.crawler.stats.inc_value(_key)
         return super(TorrentPipeline,self).media_failed(failure,request,info)
 
     def media_downloaded(self, response, request, info):
+        _key = 'torrents_downloaded'
+        info.spider.crawler.stats.inc_value(_key)
         return super(TorrentPipeline,self).media_downloaded(response,request,info)
 
     def file_path(self, request, response=None, info=None):

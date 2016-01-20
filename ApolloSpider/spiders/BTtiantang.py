@@ -13,9 +13,9 @@ from scrapy.http import Request,FormRequest
 from ApolloSpider.items import ApolloItem
 from ApolloCommon.mongodb import MongoAgentFactory as Agent
 from ApolloCommon import config
-from . import logging_start
+from . import ApolloSpider
 
-class BTtiantangSpider(BaseSpider):
+class BTtiantangSpider(ApolloSpider):
     pipeline = set([
         'ApolloSpider.pipelines.TorrentPipeline.TorrentPipeline',
     ])
@@ -27,10 +27,6 @@ class BTtiantangSpider(BaseSpider):
     complete    = False
     fin_page    = 0
     climbpage  = 0
-
-    def __init__(self, category=None, *args, **kwargs):
-        logging_start(self.name)
-        super(BTtiantangSpider, self).__init__(*args, **kwargs)
 
     def set_crawler(self, crawler):
         super(BTtiantangSpider, self).set_crawler(crawler)
@@ -236,6 +232,7 @@ class BTtiantangSpider(BaseSpider):
         yield _item
 
     def closed(self, reason):
+        super(BTtiantangSpider, self).closed(reason)
         if self.fin_page == (self.climbpage-1):
             if None == self.spider_item:
                 item = {}

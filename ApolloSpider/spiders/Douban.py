@@ -15,14 +15,10 @@ from ApolloSpider.items import DoubanItem
 from scrapy.contrib.spidermiddleware.httperror import HttpError
 from ApolloCommon.mongodb import MongoAgentFactory as Agent
 from ApolloCommon import config
-from . import logging_start
+from . import ApolloSpider
 
 class DoubanSpider(BaseSpider):
     name        = 'Douban'
-
-    def __init__(self, category=None, *args, **kwargs):
-        logging_start(self.name)
-        super(DoubanSpider, self).__init__(*args, **kwargs)
 
     def set_crawler(self, crawler):
         super(DoubanSpider, self).set_crawler(crawler)
@@ -52,7 +48,7 @@ class DoubanSpider(BaseSpider):
             max_rc = int(20/year_anchor)
             g = lambda x : 5 if x < 5 else x
             max_rc = g(max_rc)
-            
+
             if retries > max_rc:
                 return False
 
