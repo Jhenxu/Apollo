@@ -14,6 +14,8 @@ import time
 import datetime
 from django.http import HttpResponse
 from django.shortcuts import render,render_to_response
+from ApolloCommon.mongodb import MongoAgentFactory as Agent
+from ApolloCommon import config
 
 def requestWrap(call_method):
     @functools.wraps(call_method)
@@ -76,33 +78,38 @@ def api_data(request):
     elif 'loglist' == action:
         result = {}
         data = []
+        _db = Agent.getAgent().db[config.get('MONGODB_LOG')]
+        cursor = _db.find().sort([('timestamp',-1)])
+        if cursor:
+            for info in cursor:
+                _file_name =  info['fname']
+                _file_path = os.path.join(_log_dir, _file_name)
+                _file_stat = os.stat(_file_path)
 
-        def compare(x, y):
-            #按照文件插入时间倒序
-            stat_x = os.stat(os.path.join(_log_dir, x))
-            stat_y = os.stat(os.path.join(_log_dir, y))
-            if stat_x.st_ctime < stat_y.st_ctime:
-                return 1
-            elif stat_x.st_ctime > stat_y.st_ctime:
-                return -1
-            else:
-                return 0
-
-        if os.path.isdir(_log_dir) and os.path.exists(_log_dir):
-            _log_list = os.listdir(_log_dir)
-            _log_list.sort(compare)
-            for _file_name in _log_list:
                 _regex = r'^(?P<date>.*?)_(?P<time>.*?)_(?P<platform>.*?).log$'
                 m = re.match(_regex,_file_name)
                 item = {}
                 if m:
+                    getRC = lambda k,info:0 if not k in info else info[k]
                     _file_path = os.path.join(_log_dir, _file_name)
                     _file_stat = os.stat(_file_path)
                     format_time = m.group('date') + ' ' +m.group('time')
-                    item['file_size'] = _file_stat.st_size
+                    size = _file_stat.st_size
+                    item['file_size'] = str(float((size*10)/1024)/10)+' KB'
                     item['time'] = format_time
                     item['file'] = _file_name
-                    item['platform'] = m.group('platform')
+                    item['platform'] = info['platform']
+                    duration = info['duration']
+                    _day = lambda x:x/(60*60)
+                    _min = lambda x:(x%(60*60))/60
+                    _sec = lambda x:x%60
+                    _format = lambda d:'%d h %d m %d s'%(_day(duration),_min(duration),_sec(duration)) if _day(duration) > 0 else '%d m %d s'%(_min(duration),_sec(duration))
+                    item['duration'] = _format(duration)
+                    error_rc = getRC('log_count/ERROR',eval(info['stat']))
+                    item['log_error'] = error_rc
+                    ic = getRC('db_insert_count',eval(info['stat']))
+                    uc = getRC('db_update_count',eval(info['stat']))
+                    item['rc_db_changed'] = str(ic)+'/'+str(uc)
                     data.append(item)
         result['data'] = data
         return HttpResponse(json.dumps(result), content_type="application/json")

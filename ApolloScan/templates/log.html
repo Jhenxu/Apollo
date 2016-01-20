@@ -70,11 +70,13 @@
                   <table class="table table-striped table-bordered table-hover dataTable no-footer" id="dataTables-example" role="grid" width="100%">
                    <thead>
                     <tr role="row">
-                        <th>Number</th>
+                        <th></th>
                         <th>Time</th>
-                        <th>File</th>
+                        <th>Duration</th>
+                        <th>I/U</th>
                         <th>Platform</th>
                         <th>Size</th>
+                        <th>File</th>
                     </tr>
                    </thead>
                    <tbody></tbody>
@@ -135,13 +137,19 @@ var t = $('#dataTables-example').DataTable({
         "data": "time"
     },
     {
-        "data": "file"
+        "data": "duration"
+    },
+    {
+        "data": "rc_db_changed"
     },
     {
         "data": "platform"
     },
     {
         "data": "file_size"
+    },
+    {
+        "data": "file"
     }],
     "lengthMenu": [[3, 6, 20, 50, -1], [3, 6, 20, 50, "All"]],
     "columnDefs": [{
@@ -154,7 +162,7 @@ var t = $('#dataTables-example').DataTable({
             return '<a href="javascript:showlog(\''+row.file+'\');"' + data + '" target="_blank">查看</a>';
         },
         //指定是第三列
-        "targets": 2
+        "targets": 6
     }]
 
 });
