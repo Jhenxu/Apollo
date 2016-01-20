@@ -47,9 +47,12 @@ class DoubanSpider(BaseSpider):
         def _reparse_douban(update_time,ratings_count,year,retries):
             diffts = time.time()-update_time
             year_anchor = int(time.strftime("%Y", time.localtime(time.time()))) - year+1
-            max_rc = 20/year_anchor
-            if max_rc < 5:
-                max_rc = 5
+            g = lambda x : 1 if x < 1 else x
+            year_anchor = g(year_anchor)
+            max_rc = int(20/year_anchor)
+            g = lambda x : 5 if x < 5 else x
+            max_rc = g(max_rc)
+            
             if retries > max_rc:
                 return False
 
