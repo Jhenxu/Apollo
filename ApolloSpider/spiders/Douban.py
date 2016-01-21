@@ -26,15 +26,32 @@ class DoubanSpider(ApolloSpider):
 
     def start_requests(self):
         db = Agent.getAgent().db[config.get('MONGODB_ITEM','apollo_item')]
-        banlist = [item['id'] for item in Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].find({'platform':self.name,'action':'movie_not_found'})]
+        banlist = [item['id'] for item in Agent.getAgent().db[config.get('MONGODB_SPIDER')].find({'platform':self.name,'action':'movie_not_found'})]
+        search_banlist = []
+        for m in Agent.getAgent().db[config.get('MONGODB_SPIDER')].find({'platform':self.name,'action':'search_no_match'}):
+            if m['count'] > 10:
+                search_banlist.append(m['item_id'])
+                continue
+            d = (time.time() - m['timestamp'])/(60*60*24)
+            if d < 7:
+                search_banlist.append(m['item_id'])
 
-        for item in db.find({'douban_item':{'$exists':False},'douban_id':{'$exists':True}},fields=['douban_id','_id']):
-            if not item['douban_id'] == None and not '' == item['douban_id'] and not '0' == item['douban_id']:
+        for item in db.find({'platform':{'$ne':'Douban'},'douban_item':{'$exists':False}},fields=['douban_id','_id','title','starring','director']):
+            if not 'douban_id' in item or item['douban_id'] == None or '' == item['douban_id'] or '0' == item['douban_id']:
+                if not str(item['_id']) in search_banlist:
+                    api = 'https://api.douban.com/v2/movie/search?q='+item['title']
+                    req = Request(url=api,callback=self.parsesearch,dont_filter=True\
+                        ,errback = lambda e: self.parse_error(e, item))
+                    req.meta['item'] = item
+                    yield req
+                else:
+                    log.msg('SearchBan apolloItem id:'+str(item['_id']),level=log.DEBUG)
+            else:
                 if not item['douban_id'] in banlist:
                     api = 'https://api.douban.com/v2/movie/subject/'+item['douban_id']
                     req = Request(url=api,callback=self.parse,dont_filter=True\
                         ,errback = lambda e: self.parse_error(e, item))
-                    req.meta['_id'] = item['_id']
+                    req.meta['item'] = item
                     yield req
                 else:
                     log.msg('Ban douban id:'+item['douban_id'],level=log.DEBUG)
@@ -77,13 +94,69 @@ class DoubanSpider(ApolloSpider):
             api = 'https://api.douban.com/v2/movie/subject/'+_id
             req = Request(url=api,callback=self.parse,dont_filter=True\
                 ,errback = lambda e: self.parse_error(e, item))
-            req.meta['_id'] = None
+            req.meta['item'] = None
             yield req
 
     def parse(self,response):
-        item  = DoubanItem(self.name)
+        item = self._package_item(response.body)
+        item['apollo_item'] = response.meta['item']
+        yield item
+
+    def parsesearch(self,response):
+        subject,_id = self._match_subject(response)
+        if not None == subject:
+            self.crawler.stats.inc_value('found_douban_id')
+            apollo_item = response.meta['item']
+            apollo_item['douban_id'] = _id
+            api = 'https://api.douban.com/v2/movie/subject/'+apollo_item['douban_id']
+            req = Request(url=api,callback=self.parse,dont_filter=True\
+                ,errback = lambda e: self.parse_error(e, apollo_item))
+            req.meta['item'] = apollo_item
+            yield req
+
+    def _match_subject(self,response):
+        item = response.meta['item']
         jitem = json.loads(response.body)
-        item['apollo_item'] = response.meta['_id']
+        for sub in jitem['subjects']:
+            match = False
+            g = lambda k,di:di[k] if k in di else []
+            #导演match
+            for director in g('directors',sub):
+                if director['name'] in item['director']:
+                    match = True
+                    log.msg('%s 导演匹配'%(item['title'].encode('utf-8')),level=log.INFO)
+                    return (json.dumps(sub),sub['id'])
+            #演员match
+            for avatar in g('casts',sub):
+                if avatar['name'] in item['starring']:
+                    match = True
+                    log.msg('%s 演员匹配'%(item['title'].encode('utf-8')),level=log.INFO)
+                    return (json.dumps(sub),sub['id'])
+
+        _spider_db = Agent.getAgent().db[config.get('MONGODB_SPIDER')]
+        m = _spider_db.find_one({'platform':self.name,'action':'search_no_match','item_id':str(item['_id'])})
+        if m:
+            _id = m['_id']
+            del m['_id']
+            m['timestamp'] = time.time()
+            m['count'] += 1
+            _spider_db.update({'_id':_id},{'$set':m})
+            log.msg('%s 更新Banlist [%d]'%(item['title'].encode('utf-8'),m['count']),level=log.INFO)
+        else:
+            ban_item = {}
+            ban_item['platform'] = self.name
+            ban_item['action'] = 'search_no_match'
+            ban_item['item_id'] = str(item['_id'])
+            ban_item['timestamp'] = time.time()
+            ban_item['count'] = 1
+            _spider_db.insert(ban_item)
+            log.msg('%s 插入Banlist'%(item['title'].encode('utf-8')),level=log.INFO)
+        log.msg('%s 无法匹配'%(item['title'].encode('utf-8')),level=log.INFO)
+        return (None,None)
+
+    def _package_item(self,body):
+        item  = DoubanItem(self.name)
+        jitem = json.loads(body)
         item['key'] = jitem['id']
         item['summary'] = jitem['summary'].encode('utf-8','ignore')
         item['img_ore'] = jitem['images']['large'].encode('utf-8','ignore')
@@ -93,10 +166,10 @@ class DoubanSpider(ApolloSpider):
             item['year'] = int(jitem['year'])
         except:
             item['year'] = 0
-            log.msg('发生错误：%s'%traceback.format_exc(),level=log.ERROR)
+            log.msg('发生错误：%s'%traceback.format_exc(),level=log.WARNING)
         item['mobile_url'] = jitem['mobile_url'].encode('utf-8','ignore')
-        item['content'] = response.body
-        yield item
+        item['content'] = body
+        return item
 
 # msg: "You API access rate limit has been exceeded. Contact api-master@douban.com if you want higher limit. ",
 # code: 1998,
@@ -119,7 +192,7 @@ class DoubanSpider(ApolloSpider):
                             item['platform'] = self.name
                             item['action'] = 'movie_not_found'
                             item['id'] = _id
-                            Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].insert(item)
+                            Agent.getAgent().db[config.get('MONGODB_SPIDER')].insert(item)
                         log.msg('%s %s'%(jitem['code'],jitem['msg'].encode('utf-8','ignore')),level=log.ERROR)
                     else:
                         log.msg('发生错误：%s %s'%(jitem['code'],jitem['msg'].encode('utf-8','ignore')),level=log.ERROR)

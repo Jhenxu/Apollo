@@ -165,9 +165,17 @@ class MongodbPipeline(object):
 
         def update_apollo_item(result):
             if result and 'apollo_item' in item and not None == item['apollo_item']:
-                _db.update({'_id':item['apollo_item']},{'$set':{'douban_item':result}})
-                log.msg('更新条目:'+str(item['apollo_item']),level=log.INFO)
-
+                apollo_item = item['apollo_item']
+                g = lambda k,d:d[k] if k in d else None
+                _id = g('_id',apollo_item)
+                _douban_id = g('douban_id',apollo_item)
+                if not None == _id:
+                    r = {}
+                    r['douban_item'] = result
+                    if not None == _douban_id:
+                        r['douban_id'] = _douban_id
+                    _db.update({'_id':_id},{'$set':r})
+                    log.msg('更新条目:'+str(item['apollo_item']['title'].encode('utf-8')),level=log.INFO)
 
         if not dbItem == None:
             data = item.toDBItem()
