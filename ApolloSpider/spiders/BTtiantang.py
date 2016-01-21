@@ -8,7 +8,6 @@
 #########################################################################
 import re,random,time
 from scrapy import log
-from scrapy.spider import BaseSpider
 from scrapy.http import Request,FormRequest
 from ApolloSpider.items import ApolloItem
 from ApolloCommon.mongodb import MongoAgentFactory as Agent

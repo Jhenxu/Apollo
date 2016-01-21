@@ -8,7 +8,6 @@
 #########################################################################
 import json,traceback,time
 from scrapy import log
-from scrapy.spider import BaseSpider
 from scrapy.http import Request
 from scrapy.exceptions import CloseSpider
 from ApolloSpider.items import DoubanItem
@@ -17,7 +16,7 @@ from ApolloCommon.mongodb import MongoAgentFactory as Agent
 from ApolloCommon import config
 from . import ApolloSpider
 
-class DoubanSpider(BaseSpider):
+class DoubanSpider(ApolloSpider):
     name        = 'Douban'
 
     def set_crawler(self, crawler):
