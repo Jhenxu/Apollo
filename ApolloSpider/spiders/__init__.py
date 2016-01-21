@@ -37,4 +37,4 @@ class ApolloSpider(BaseSpider):
         result['fname'] = self.logfile
         result['timestamp'] = self.start_time
         result['platform'] = self.name
-        Agent.getAgent().db[config.get('MONGODB_LOG')].insert(item)
+        Agent.getAgent().db[config.get('MONGODB_LOG')].insert(result)
