@@ -71,7 +71,7 @@ class DoubanSpider(ApolloSpider):
                     reparseitems.append(item['key'])
                     log.msg('重新爬取DoubanItem:'+str(item['key']),level=log.DEBUG)
                 else:
-                    log.msg('Ban douban id:'+item['douban_id'],level=log.INFO)
+                    log.msg('Ban douban id:'+item['key'],level=log.INFO)
         log.msg('重新爬取Douban:'+str(len(reparseitems)),level=log.INFO)
         for _id in reparseitems:
             api = 'https://api.douban.com/v2/movie/subject/'+_id
