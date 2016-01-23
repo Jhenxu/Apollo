@@ -121,17 +121,19 @@ class DoubanSpider(ApolloSpider):
             match = False
             g = lambda k,di:di[k] if k in di else []
             #导演match
-            for director in g('directors',sub):
-                if director['name'] in item['director']:
-                    match = True
-                    log.msg('%s 导演匹配'%(item['title'].encode('utf-8')),level=log.INFO)
-                    return (json.dumps(sub),sub['id'])
+            if len(item['director']) > 0:
+                for director in g('directors',sub):
+                    if director['name'] in item['director']:
+                        match = True
+                        log.msg('%s 导演匹配'%(item['title'].encode('utf-8')),level=log.INFO)
+                        return (json.dumps(sub),sub['id'])
             #演员match
-            for avatar in g('casts',sub):
-                if avatar['name'] in item['starring']:
-                    match = True
-                    log.msg('%s 演员匹配'%(item['title'].encode('utf-8')),level=log.INFO)
-                    return (json.dumps(sub),sub['id'])
+            if len(item['starring']) > 0:
+                for avatar in g('casts',sub):
+                    if avatar['name'] in item['starring']:
+                        match = True
+                        log.msg('%s 演员匹配'%(item['title'].encode('utf-8')),level=log.INFO)
+                        return (json.dumps(sub),sub['id'])
 
         _spider_db = Agent.getAgent().db[config.get('MONGODB_SPIDER')]
         m = _spider_db.find_one({'platform':self.name,'action':'search_no_match','item_id':str(item['_id'])})

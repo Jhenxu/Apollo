@@ -7,6 +7,7 @@
 # Created Time: 2015-12-04 17:37:25
 #########################################################################
 import hashlib
+import os
 from ApolloSpider.utils import isFileExpire
 from ApolloSpider.pipelines import check_spider_pipeline
 from scrapy import log
@@ -14,6 +15,7 @@ from scrapy.http import Request
 from scrapy.exceptions import DropItem
 from scrapy.contrib.pipeline.files import FileException, FilesPipeline
 from scrapy.utils.request import request_fingerprint
+from ApolloCommon.torrentparse import TorrentParser
 
 class NotorrentsDrop(DropItem):
     """Product with no torrent exception"""
@@ -63,8 +65,19 @@ class TorrentPipeline(FilesPipeline):
 
     def item_completed(self, results, item, info):
         for _file in [x['path'] for ok, x in results if ok]:
-            item['torrents'].append(_file)
-            log.msg('种子下载完成:'+_file,level=log.INFO)
+            _path = os.path.join(self.STORE_URI,_file)
+            if os.path.exists(_path):
+                log.msg('种子下载完成:'+_file,level=log.INFO)
+                tp = TorrentParser(_path)
+                if tp.is_torrent():
+                    _key = 'torrents_downloaded'
+                    info.spider.crawler.stats.inc_value(_key)
+                    item['torrents'].append(_file)
+                else:
+                    _key = 'torrents_checkdown_failed'
+                    info.spider.crawler.stats.inc_value(_key)
+                    os.remove(_path)
+                    log.msg('下载完成，但种子校验失败:'+_file,level=log.INFO)
         return item
 
     def media_to_download(self, request, info):
@@ -76,8 +89,6 @@ class TorrentPipeline(FilesPipeline):
         return super(TorrentPipeline,self).media_failed(failure,request,info)
 
     def media_downloaded(self, response, request, info):
-        _key = 'torrents_downloaded'
-        info.spider.crawler.stats.inc_value(_key)
         return super(TorrentPipeline,self).media_downloaded(response,request,info)
 
     def file_path(self, request, response=None, info=None):
