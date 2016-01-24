@@ -38,7 +38,7 @@ class DoubanSpider(ApolloSpider):
 
         for item in db.find({'platform':{'$ne':'Douban'},'douban_item':{'$exists':False}},fields=['douban_id','_id','title','starring','director']):
             if not 'douban_id' in item or item['douban_id'] == None or '' == item['douban_id'] or '0' == item['douban_id']:
-                if not str(item['_id']) in search_banlist:
+                if not str(item['_id']) in search_banlist and 'starring' in item and len(item['starring']) > 0:
                     api = 'https://api.douban.com/v2/movie/search?q='+item['title']
                     req = Request(url=api,callback=self.parsesearch,dont_filter=True\
                         ,errback = lambda e: self.parse_error(e, item))
