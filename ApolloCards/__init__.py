@@ -33,7 +33,7 @@ def card_method(key):
 class BaseCardManager(object):
 
     def __init__(self):
-        self.db = MongoAgentFactory.getAgent().db[config.get('MONGODB_ITEM','apollo_item')]
+        self.db = MongoAgentFactory.getDB()
 
     def calculate_skip(self,page,page_count):
         if page < 1:

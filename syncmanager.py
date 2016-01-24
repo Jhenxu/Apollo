@@ -73,7 +73,7 @@ def sync_locale_store():
 
 def sync_log():
     _log_dir = os.path.join(os.getcwd(), 'logs')
-    _db = Agent.getAgent().db[config.get('MONGODB_LOG')]
+    _db = Agent.getLogDB()
 
     def compare(x, y):
         #按照文件插入时间升序

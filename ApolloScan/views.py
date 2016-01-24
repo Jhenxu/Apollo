@@ -78,7 +78,7 @@ def api_data(request):
     elif 'loglist' == action:
         result = {}
         data = []
-        _db = Agent.getAgent().db[config.get('MONGODB_LOG')]
+        _db = Agent.getLogDB()
         cursor = _db.find().sort([('timestamp',-1)])
         if cursor:
             for info in cursor:

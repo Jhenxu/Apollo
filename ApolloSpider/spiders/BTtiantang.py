@@ -33,7 +33,7 @@ class BTtiantangSpider(ApolloSpider):
         self.SPIDER_EXPIRED_DAYS = crawler.settings.getint('APOLLO_FULL_SPIDER',0)
 
     def parse(self,response):
-        self.spider_item = Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].find_one(\
+        self.spider_item = Agent.getSpiderDB().find_one(\
                 {'platform':self.name},fields=['lastime','endpage'])
 
         _end_regex = '<li><a href=\'/\?PageNo=(\d*?)\'>末页</a></li>'
@@ -124,7 +124,7 @@ class BTtiantangSpider(ApolloSpider):
         if p:
             _item['img_ore'] = p.group('url')
 
-        dbItem = Agent.getAgent().db[config.get('MONGODB_ITEM','apollo_item')].find_one(\
+        dbItem = Agent.getDB().find_one(\
                 {'key':_item.getKey()},fields=['douban_id','timestamp','torrents_size','years'])
         _item['meta']['dbItem'] = dbItem
 
@@ -238,11 +238,11 @@ class BTtiantangSpider(ApolloSpider):
                 item['platform'] = self.name
                 item['lastime'] = time.time()
                 item['endpage'] = self._end_page
-                Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].insert(item)
+                Agent.getSpiderDB().insert(item)
                 log.msg('更新SpiderItem.[%s]'%str(item),level=log.INFO)
             else:
                 self.spider_item['lastime'] = time.time()
                 mogon_id = self.spider_item['_id']
                 del self.spider_item['_id']
-                Agent.getAgent().db[config.get('MONGODB_SPIDER','apollo_spider')].update({'_id':mogon_id},{'$set':self.spider_item})
+                Agent.getSpiderDB().update({'_id':mogon_id},{'$set':self.spider_item})
                 log.msg('更新SpiderItem.[%s]'%str(self.spider_item),level=log.INFO)

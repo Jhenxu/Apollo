@@ -25,10 +25,10 @@ class DoubanSpider(ApolloSpider):
         crawler.settings.overrides['RANDOMIZE_DOWNLOAD_DELAY'] = True
 
     def start_requests(self):
-        db = Agent.getAgent().db[config.get('MONGODB_ITEM','apollo_item')]
-        banlist = [item['id'] for item in Agent.getAgent().db[config.get('MONGODB_SPIDER')].find({'platform':self.name,'action':'movie_not_found'})]
+        db = Agent.getDB()
+        banlist = [item['id'] for item in Agent.getSpiderDB().find({'platform':self.name,'action':'movie_not_found'})]
         search_banlist = []
-        for m in Agent.getAgent().db[config.get('MONGODB_SPIDER')].find({'platform':self.name,'action':'search_no_match'}):
+        for m in Agent.getSpiderDB().find({'platform':self.name,'action':'search_no_match'}):
             if m['count'] > 10:
                 search_banlist.append(m['item_id'])
                 continue
@@ -135,7 +135,7 @@ class DoubanSpider(ApolloSpider):
                         log.msg('%s 演员匹配'%(item['title'].encode('utf-8')),level=log.INFO)
                         return (json.dumps(sub),sub['id'])
 
-        _spider_db = Agent.getAgent().db[config.get('MONGODB_SPIDER')]
+        _spider_db = Agent.getSpiderDB()
         m = _spider_db.find_one({'platform':self.name,'action':'search_no_match','item_id':str(item['_id'])})
         if m:
             _id = m['_id']
@@ -194,7 +194,7 @@ class DoubanSpider(ApolloSpider):
                             item['platform'] = self.name
                             item['action'] = 'movie_not_found'
                             item['id'] = _id
-                            Agent.getAgent().db[config.get('MONGODB_SPIDER')].insert(item)
+                            Agent.getSpiderDB().insert(item)
                         log.msg('%s %s'%(jitem['code'],jitem['msg'].encode('utf-8','ignore')),level=log.ERROR)
                     else:
                         log.msg('发生错误：%s %s'%(jitem['code'],jitem['msg'].encode('utf-8','ignore')),level=log.ERROR)

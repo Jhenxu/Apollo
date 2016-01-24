@@ -26,8 +26,8 @@ class MongoAgent(object):
             MONGODB_DB = config.get('MONGODB_DB', 'apollo_db')
 
             client = MongoClient(MONGODB_SERVER,MONGODB_PORT)
-            self.db = client[MONGODB_DB]
-            self.db[config.get('MONGODB_ITEM','apollo_item')].ensure_index('key',unique=True)
+            self.colletcion = client[MONGODB_DB]
+            self.colletcion[config.get('MONGODB_ITEM','apollo_item')].ensure_index('key',unique=True)
         except Exception as e:
             log.msg(str(e),level=log.ERROR)
             traceback.print_exc()
@@ -36,7 +36,15 @@ class MongoAgentFactory(object):
     @staticmethod
     def getAgent():
         return MongoAgent()
-        
+
     @staticmethod
     def getDB():
-        return MongoAgent().db[config.get('MONGODB_ITEM','apollo_item')]
+        return MongoAgent().colletcion[config.get('MONGODB_ITEM','apollo_item')]
+
+    @staticmethod
+    def getLogDB():
+        return MongoAgent().colletcion[config.get('MONGODB_LOG')]
+
+    @staticmethod
+    def getSpiderDB():
+        return MongoAgent().colletcion[config.get('MONGODB_SPIDER')]
