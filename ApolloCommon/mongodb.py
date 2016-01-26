@@ -32,14 +32,43 @@ class MongoAgent(object):
             log.msg(str(e),level=log.ERROR)
             traceback.print_exc()
 
+class ApolloItemCollectionWarpper(object):
+    '''装饰apollo_item采集器'''
+    def __init__ (self, func):
+        self.func = func
+        for name in set(dir(func)) - set(dir(self)):
+            setattr(self, name, getattr(func, name))
+
+    def __call__ (self, *args):
+        return self.func(*args)
+
+    def find_one(self, *args, **kargs):
+        condition = {}
+        condition['status'] = {'$ne':10}#尚未激活
+        if len(args) > 0:
+            condition.update(args[0])
+        return self.func.find_one(condition, **kargs)
+
+    def find(self, *args, **kargs):
+        condition = {}
+        condition['status'] = {'$ne':10}#尚未激活
+        if len(args) > 0:
+            condition.update(args[0])
+        return self.func.find(condition, **kargs)
+
 class MongoAgentFactory(object):
-    @staticmethod
-    def getAgent():
-        return MongoAgent()
+    apollo_db = None
 
     @staticmethod
     def getDB():
-        return MongoAgent().colletcion[config.get('MONGODB_ITEM','apollo_item')]
+        if None == MongoAgentFactory.apollo_db:
+            db = MongoAgent().colletcion[config.get('MONGODB_ITEM')]
+            MongoAgentFactory.apollo_db = ApolloItemCollectionWarpper(db)
+        return MongoAgentFactory.apollo_db
+
+    @staticmethod
+    def getNoWarpDB():
+        return MongoAgent().colletcion[config.get('MONGODB_ITEM')]
 
     @staticmethod
     def getLogDB():

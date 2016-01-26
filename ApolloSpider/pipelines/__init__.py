@@ -58,8 +58,8 @@ class ApolloImagePipline(ImagesPipeline):
 
     def process_item(self, item, spider):
         _img_url = ''
-        if 'img_ore' in item and len(item['img_ore']) > 0:
-            _img_url = item['img_ore']
+        if 'img_src' in item and len(item['img_src']) > 0:
+            _img_url = item['img_src']
 
         if not _img_url == None and not '' == _img_url:
             req = self._build_request(_img_url,item['platform'])
@@ -79,7 +79,7 @@ class ApolloImagePipline(ImagesPipeline):
         return req
 
     def get_media_requests(self, item, info):
-        _img_url = item['img_ore']
+        _img_url = item['img_src']
         _platform = item['platform']
         return self._build_request(_img_url,platform=_platform)
 
@@ -113,7 +113,7 @@ class ApolloImagePipline(ImagesPipeline):
 
 class MongodbPipeline(object):
     def __init__(self):
-        self.db = MongoAgentFactory.getDB()
+        self.db = MongoAgentFactory.getNoWarpDB()
 
     def process_item(self,item,spider):
         return self._process_db(item,spider)
@@ -125,7 +125,7 @@ class MongodbPipeline(object):
             return self._process_douban(item,spider)
 
     def _process_apollo(self,item,spider):
-        dbItem = self.dbfind_one({'key':item.getKey()},fields=['torrents','torrents_size'])
+        dbItem = self.db.find_one({'key':item.getKey()},fields=['torrents','torrents_size'])
         if not dbItem == None:
             if len(item.get('torrents',[])) > 0:
                 for n in item.get('torrents',[]):
@@ -134,7 +134,7 @@ class MongodbPipeline(object):
                 update_dict = {'torrents':dbItem['torrents']\
                         ,'torrents_size':len(dbItem.get('torrent',[]))\
                         ,'timestamp':time.time()}
-                result = self.dbupdate({'_id':dbItem['_id']},{'$set':update_dict})
+                result = self.db.update({'_id':dbItem['_id']},{'$set':update_dict})
 
                 _key = 'db_update_count'
                 spider.crawler.stats.inc_value(_key)
@@ -146,10 +146,10 @@ class MongodbPipeline(object):
             detail = item.toDBItem()
             detail['ins_ts'] = time.time()
             if 'douban_id' in item and not item['douban_id'] == None and not '' == item['douban_id'] and not '0' == item['douban_id']:
-                r = self.dbfind_one({'platform':'Douban','key':item['douban_id']})
+                r = self.db.find_one({'platform':'Douban','key':item['douban_id']})
                 if r:
                     detail['douban_item'] = r['_id']
-            result = self.dbinsert(detail)
+            result = self.db.insert(detail)
             if len(item.get('torrents',[])) == 0:
                 log.msg('未获取种子:'+str(item['title'].encode('utf-8')),level=log.WARNING)
             log.msg('插入新条目:'+str(item['title'].encode('utf-8')),level=log.INFO)
@@ -159,7 +159,7 @@ class MongodbPipeline(object):
         return item
 
     def _process_douban(self,item,spider):
-        dbItem = self.dbfind_one({'key':item['key']})
+        dbItem = self.db.find_one({'key':item['key']})
 
         def update_apollo_item(result):
             if result and 'apollo_item' in item and not None == item['apollo_item']:
@@ -172,7 +172,7 @@ class MongodbPipeline(object):
                     r['douban_item'] = result
                     if not None == _douban_id:
                         r['douban_id'] = _douban_id
-                    self.dbupdate({'_id':_id},{'$set':r})
+                    self.db.update({'_id':_id},{'$set':r})
                     log.msg('更新条目:'+str(item['apollo_item']['title'].encode('utf-8')),level=log.INFO)
 
         if not dbItem == None:
@@ -182,14 +182,14 @@ class MongodbPipeline(object):
             else:
                 data['retries'] = 1
 
-            result = self.dbupdate({'_id':dbItem['_id']},{'$set':data})
+            result = self.db.update({'_id':dbItem['_id']},{'$set':data})
             update_apollo_item(result)
             log.msg('更新Douban条目:'+str(item['key'].encode('utf-8')),level=log.INFO)
 
             _key = 'db_update_count'
             spider.crawler.stats.inc_value(_key)
         else:
-            result = self.dbinsert(item.toDBItem())
+            result = self.db.insert(item.toDBItem())
             update_apollo_item(result)
             log.msg('插入新Douban条目:'+str(item['key'].encode('utf-8')),level=log.INFO)
 

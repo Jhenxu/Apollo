@@ -9,13 +9,17 @@ from scrapy.item import Item,Field
 import scrapy,time,hashlib
 
 class ApolloItem(Item):
-    def __init__(self,platform):
+    ''''''
+    def __init__(self,platform,prikey = None):
         scrapy.Item.__init__(self)
         self['platform'] = platform
         self['torrents'] = []
         self['torrents_reqs'] = []
         self['meta'] = {}
         self['years'] = 0
+        self['status'] = 0
+        self['tags'] = []
+        self['key'] = prikey
 
     platform        = Field()   #平台标记 str
     title           = Field()   #名称     str
@@ -30,8 +34,10 @@ class ApolloItem(Item):
     douban_id       = Field()   #豆瓣id         str
     img             = Field()   #图片本地路径    str
     torrents        = Field()   #种子信息       []
-
-    img_ore         = Field()   #图片源地址
+    status          = Field()   #条目状态 0 正常(default) 10 尚未激活
+    release_date    = Field()   #上映日期
+    key             = Field()
+    img_src         = Field()   #图片源地址
     torrents_reqs   = Field()   #种子地址request
     meta            = Field()   #临时数据dict
 
@@ -49,6 +55,9 @@ class ApolloItem(Item):
                 'douban_id':str(self.get('douban_id','')),
                 'stars':self.get('stars',0),
                 'img':self.get('img',''),
+                'status':self.get('status',0),
+                'release_date':self.get('release_date',''),
+                'img_src':self.get('img_src',''),
                 }
         return result
 
@@ -64,8 +73,13 @@ class ApolloItem(Item):
         return result
 
     def getKey(self):
-        code = '%s_%s'%(str(self['title'].encode('utf-8')),self['years'])
-        return hashlib.sha1(str(code)).hexdigest()
+        if None == self['key'] or '' == self['key']:
+            print '### 1'
+            code = '%s_%s'%(str(self['title'].encode('utf-8')),self['years'])
+            self['key'] = hashlib.sha1(str(code)).hexdigest()
+            return self['key']
+        else:
+            return self['key']
 
     def __setitem__(self, key, value):
         if key in self.fields:
@@ -114,7 +128,7 @@ class DoubanItem(Item):
     content         = Field()   #response.body
     img             = Field()   #download img path
 
-    img_ore         = Field()   #海报地址
+    img_src         = Field()   #海报地址
     apollo_item     = Field()   #ApolloItem mogonid
 
     def toDBItem(self):

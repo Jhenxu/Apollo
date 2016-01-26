@@ -122,7 +122,7 @@ class BTtiantangSpider(ApolloSpider):
         _regex_img = r'<div class="moviedteail_img">\s+<a class="pic".*?src="(?P<url>.*?)" onerror.*?</a>'
         p = re.search(_regex_img,response.body)
         if p:
-            _item['img_ore'] = p.group('url')
+            _item['img_src'] = p.group('url')
 
         dbItem = Agent.getDB().find_one(\
                 {'key':_item.getKey()},fields=['douban_id','timestamp','torrents_size','years'])

@@ -161,7 +161,7 @@ class DoubanSpider(ApolloSpider):
         jitem = json.loads(body)
         item['key'] = jitem['id']
         item['summary'] = jitem['summary'].encode('utf-8','ignore')
-        item['img_ore'] = jitem['images']['large'].encode('utf-8','ignore')
+        item['img_src'] = jitem['images']['large'].encode('utf-8','ignore')
         item['rating_score'] = float(jitem['rating']['average'])
         item['ratings_count'] = jitem['ratings_count']
         try:
