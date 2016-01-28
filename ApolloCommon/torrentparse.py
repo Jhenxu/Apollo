@@ -219,11 +219,14 @@ class TorrentParser(object):
         elif parsed_char == self.DICT_START:
             parsed_dict = {}
             while True:
-                dict_key = self._parse_torrent()
-                if not dict_key:
-                    break # End of dict
-                dict_value = self._parse_torrent() # parse value
-                parsed_dict.setdefault(dict_key, dict_value)
+                try:
+                    dict_key = self._parse_torrent()
+                    if not dict_key:
+                        break # End of dict
+                    dict_value = self._parse_torrent() # parse value
+                    parsed_dict.setdefault(dict_key, dict_value)
+                except TypeError:
+                    continue
 
             return parsed_dict
 

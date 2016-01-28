@@ -64,10 +64,12 @@ class TorrentPipeline(FilesPipeline):
         return [req for req in item.get('torrents_reqs', [])]
 
     def item_completed(self, results, item, info):
-        for _file in [x['path'] for ok, x in results if ok]:
+        for _info in [x for ok, x in results if ok]:
+            _file = _info['path']
             _path = os.path.join(self.STORE_URI,_file)
             if os.path.exists(_path):
                 log.msg('种子下载完成:'+_file,level=log.INFO)
+                print _path
                 tp = TorrentParser(_path)
                 if tp.is_torrent():
                     _key = 'torrents_downloaded'
@@ -77,7 +79,7 @@ class TorrentPipeline(FilesPipeline):
                     _key = 'torrents_checkdown_failed'
                     info.spider.crawler.stats.inc_value(_key)
                     os.remove(_path)
-                    log.msg('下载完成，但种子校验失败:'+_file,level=log.ERROR)
+                    log.msg('下载完成，但种子校验失败:[%s][%s]'%(_file,_info['url']),level=log.ERROR)
         return item
 
     def media_to_download(self, request, info):

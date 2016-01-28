@@ -23,7 +23,7 @@ class SuppigSpider(BaseSpider):
 
     name        = 'Suppig'
     BASE_URL    = 'http://www.suppig.net/forum.php?mod=forumdisplay&fid=306'
-    PAGE_SIZE = 15
+    PAGE_SIZE = 12#10年以前无法下载
     BAN_TAG = ['预告片']
     FULL_SPIDER = False
     complete    = False
@@ -35,7 +35,7 @@ class SuppigSpider(BaseSpider):
             url = self.BASE_URL + ('&page=%d'%n)
             yield self.make_requests_from_url(url)
 
-        # _url = 'http://www.suppig.net/forum.php?mod=viewthread&tid=1125363&extra=page%3D1'
+        # _url = 'http://www.suppig.net/forum.php?mod=viewthread&tid=824632&extra=page%3D14'
         # req = Request(url=_url,callback=self.parseItem,dont_filter=True)
         # req.meta['tid'] = 1125363
         # req.meta['item_name'] = '[2016冬季][别让我走 02][绫濑遥/三浦春马/水川麻美/铃木梨央/麻生祐未]1/24发布'
