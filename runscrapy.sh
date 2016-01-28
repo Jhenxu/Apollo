@@ -6,4 +6,4 @@
 #########################################################################
 #!/bin/bash
 
-scrapy crawl BTtiantang&&scrapy crawl Douban
+scrapy crawl BTtiantang&&scrapy crawl Suppig&&scrapy crawl Douban

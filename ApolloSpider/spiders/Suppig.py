@@ -16,7 +16,7 @@ from ApolloCommon import config
 from . import ApolloSpider
 from scrapy.spider import BaseSpider
 
-class SuppigSpider(BaseSpider):
+class SuppigSpider(ApolloSpider):
     pipeline = set([
         'ApolloSpider.pipelines.TorrentPipeline.TorrentPipeline',
     ])
@@ -25,13 +25,18 @@ class SuppigSpider(BaseSpider):
     BASE_URL    = 'http://www.suppig.net/forum.php?mod=forumdisplay&fid=306'
     PAGE_SIZE = 12#10年以前无法下载
     BAN_TAG = ['预告片']
-    FULL_SPIDER = False
-    complete    = False
     fin_page    = 0
     climbpage  = 0
 
     def start_requests(self):
-        for n in range(1,self.PAGE_SIZE):
+        if self.isFullSpder():
+            self.climbpage = self.PAGE_SIZE
+            log.msg('进入完全爬取模式.[%d]'%self.climbpage,level=log.INFO)
+        else:
+            self.climbpage = 1
+            log.msg('进入半爬取模式.[%d]'%self.climbpage,level=log.INFO)
+
+        for n in range(1,(self.climbpage+1)):
             url = self.BASE_URL + ('&page=%d'%n)
             yield self.make_requests_from_url(url)
 
@@ -43,11 +48,13 @@ class SuppigSpider(BaseSpider):
 
     def set_crawler(self, crawler):
         super(SuppigSpider, self).set_crawler(crawler)
-        self.ITEM_DEEP_SPIDER = crawler.settings.getint('APOLLO_ITEM_DEEP_SPIDER',0)
-        self.SPIDER_EXPIRED_DAYS = crawler.settings.getint('APOLLO_FULL_SPIDER',0)
         self.html_parser = HTMLParser.HTMLParser()
 
     def parse(self,response):
+        self.fin_page += 1
+        if self.fin_page == self.climbpage:
+            self.complete = True
+
         _regex_th = r'<th class="(common|new)">([\s\S]*?)</th>'
         _regex_item = r'<a href="(?P<url>.*?)".*?>(?P<item>.*?)</a>'
         content = response.body.decode('gbk','ignore').encode('utf-8')
@@ -145,19 +152,5 @@ class SuppigSpider(BaseSpider):
     def _unescape(self,content):
         return self.html_parser.unescape(content)
 
-    # def closed(self, reason):
-    #     super(SuppigSpider, self).closed(reason)
-    #     if self.fin_page == (self.climbpage-1):
-    #         if None == self.spider_item:
-    #             item = {}
-    #             item['platform'] = self.name
-    #             item['lastime'] = time.time()
-    #             item['endpage'] = self._end_page
-    #             Agent.getSpiderDB().insert(item)
-    #             log.msg('更新SpiderItem.[%s]'%str(item),level=log.INFO)
-    #         else:
-    #             self.spider_item['lastime'] = time.time()
-    #             mogon_id = self.spider_item['_id']
-    #             del self.spider_item['_id']
-    #             Agent.getSpiderDB().update({'_id':mogon_id},{'$set':self.spider_item})
-    #             log.msg('更新SpiderItem.[%s]'%str(self.spider_item),level=log.INFO)
+    def closed(self, reason):
+        super(SuppigSpider, self).closed(reason)
