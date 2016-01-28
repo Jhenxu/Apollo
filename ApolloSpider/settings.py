@@ -49,7 +49,7 @@ TORRENTS_STORE = config.get('TORRENTS_STORE')
 TORRENT_EXPIRES = 180       #根据lastmodify
 FILE_EXPIRES = -1           #根据文件修改日期IMAGES TORRENT 0:过期 -1:不过期
 APOLLO_ITEM_DEEP_SPIDER = 7      #深度爬取时间间隔（已经存在的item再次深度爬取）
-APOLLO_FULL_SPIDER = 30
+APOLLO_FULL_SPIDER = 30     #0 总是完全 -1 第一次完全爬取后以后一直不完全爬取 >0 完全爬取间隔天数
 
 # # RandomProxy Retry many times since proxies often fail
 # RETRY_TIMES = 10

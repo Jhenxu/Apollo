@@ -8,17 +8,17 @@
 #########################################################################
 import os,time
 
-def isFileExpire(file,expire=0):
+def isFileExpire(f,expire=0):
     if expire == 0:
         return True
 
     file_last_modify = 0.0
 
     try:
-        if isinstance(file,str):
-            file_last_modify = os.path.getmtime(file)
-        elif isinstance(file,file):
-            file_last_modify = os.path.getmtime(file.name)
+        if isinstance(f,str):
+            file_last_modify = os.path.getmtime(f)
+        elif isinstance(f,file):
+            file_last_modify = os.path.getmtime(f.name)
     except OSError:
         return True
 

@@ -10,7 +10,7 @@ import scrapy,time,hashlib
 
 class ApolloItem(Item):
     ''''''
-    def __init__(self,platform,prikey = None):
+    def __init__(self,platform,prikey = ''):
         scrapy.Item.__init__(self)
         self['platform'] = platform
         self['torrents'] = []
@@ -74,7 +74,6 @@ class ApolloItem(Item):
 
     def getKey(self):
         if None == self['key'] or '' == self['key']:
-            print '### 1'
             code = '%s_%s'%(str(self['title'].encode('utf-8')),self['years'])
             self['key'] = hashlib.sha1(str(code)).hexdigest()
             return self['key']

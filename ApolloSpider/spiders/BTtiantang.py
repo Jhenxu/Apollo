@@ -11,7 +11,6 @@ from scrapy import log
 from scrapy.http import Request,FormRequest
 from ApolloSpider.items import ApolloItem
 from ApolloCommon.mongodb import MongoAgentFactory as Agent
-from ApolloCommon import config
 from . import ApolloSpider
 
 class BTtiantangSpider(ApolloSpider):
@@ -22,31 +21,20 @@ class BTtiantangSpider(ApolloSpider):
     name        = 'BTtiantang'
     BASE_URL    = 'http://www.bttiantang.com/'
     start_urls  = [BASE_URL]
-    FULL_SPIDER = False
-    complete    = False
     fin_page    = 0
     climbpage  = 0
 
     def set_crawler(self, crawler):
+        crawler.settings.overrides['APOLLO_FULL_SPIDER'] = -1 #不完全爬取
         super(BTtiantangSpider, self).set_crawler(crawler)
-        self.ITEM_DEEP_SPIDER = crawler.settings.getint('APOLLO_ITEM_DEEP_SPIDER',0)
-        self.SPIDER_EXPIRED_DAYS = crawler.settings.getint('APOLLO_FULL_SPIDER',0)
 
     def parse(self,response):
-        self.spider_item = Agent.getSpiderDB().find_one(\
-                {'platform':self.name},fields=['lastime','endpage'])
-
         _end_regex = '<li><a href=\'/\?PageNo=(\d*?)\'>末页</a></li>'
         self._end_page = int(re.findall(_end_regex,response.body)[0])+1
-        expired = False
-        if not self.spider_item == None:
-            expired = (time.time()-(self.spider_item['lastime']-1)) > self.SPIDER_EXPIRED_DAYS*24*60*60
 
-        if self.spider_item == None or expired:
-            log.msg('进入完全爬取模式[spider_item is None [%s] expired=%s].'\
-                %(str(self.spider_item == None),expired),level=log.INFO)
-            self.FULL_SPIDER = True
+        if self.isFullSpder():
             self.climbpage = self._end_page
+            log.msg('进入完全爬取模式.[%d]'%self.climbpage,level=log.INFO)
         else:
             self.climbpage = self._end_page - self.spider_item['endpage']+2
             log.msg('进入半爬取模式.[%d]'%self.climbpage,level=log.INFO)
@@ -63,6 +51,9 @@ class BTtiantangSpider(ApolloSpider):
 
     def parsePage(self,response):
         self.fin_page += 1
+        if self.fin_page == (self.climbpage-1):
+            self.complete = True
+
         _item_url_regex = '</span><a href="/subject/(.*?)" target="_blank">'
         for url in re.findall(_item_url_regex,response.body):
             itemUrl = self.BASE_URL+'subject/'+url
@@ -129,7 +120,7 @@ class BTtiantangSpider(ApolloSpider):
         _item['meta']['dbItem'] = dbItem
 
         if not None == dbItem and dbItem['torrents_size'] > 0 \
-                and (time.time()-dbItem['timestamp']) < (self.ITEM_DEEP_SPIDER*24*60*60):
+                and (time.time()-dbItem['timestamp']) < (self.TS_ITEM_DEEP_SPIDER):
             log.msg('跳过种子获取.[%s]'%response.url,level=log.DEBUG)
             yield self._relay_douban(_item)
         else:
@@ -231,18 +222,5 @@ class BTtiantangSpider(ApolloSpider):
         yield _item
 
     def closed(self, reason):
+        self.info['endpage'] = self._end_page
         super(BTtiantangSpider, self).closed(reason)
-        if self.fin_page == (self.climbpage-1):
-            if None == self.spider_item:
-                item = {}
-                item['platform'] = self.name
-                item['lastime'] = time.time()
-                item['endpage'] = self._end_page
-                Agent.getSpiderDB().insert(item)
-                log.msg('更新SpiderItem.[%s]'%str(item),level=log.INFO)
-            else:
-                self.spider_item['lastime'] = time.time()
-                mogon_id = self.spider_item['_id']
-                del self.spider_item['_id']
-                Agent.getSpiderDB().update({'_id':mogon_id},{'$set':self.spider_item})
-                log.msg('更新SpiderItem.[%s]'%str(self.spider_item),level=log.INFO)

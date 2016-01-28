@@ -1,0 +1,61 @@
+{% extends "scan_page.html" %}
+
+{%block loader_header %}
+<!-- DataTables CSS -->
+<link href="../../static/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet">
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="../../static/bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js"></script>
+{% endblock %}
+
+{%block loader_content %}
+<div class="row">
+  <div class="col-lg-12">
+      <h1 class="page-header">{{title}}</h1>
+  </div>
+  <!-- /.col-lg-12 -->
+</div>
+<div class="row">
+  <div class="col-lg-12">
+      <div class="panel panel-default">
+          <div class="panel-heading">
+              DataTables Activation Tables
+          </div>
+          <!-- /.panel-heading -->
+          <div class="panel-body">
+              <div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+                <div class="dataTables_length" id="dataTables-example_length">
+                <!-- <button id="redraw" style="width: 50px;height: 25px">刷新</button> -->
+                <div class="col-sm-12">
+                  <table class="table table-striped table-bordered table-hover dataTable no-footer table-nonfluid" id="dataTables-example" role="grid" width="100%">
+                   <thead>
+                    <tr role="row">
+                        <th></th>
+                        <th>Time</th>
+                        <th>Duration</th>
+                        <th>I/U</th>
+                        <th>Platform</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                        <th>File</th>
+                    </tr>
+                   </thead>
+                   <tbody></tbody>
+                   <!-- tbody是必须的 -->
+                 </table>
+               </div>
+
+              </div>
+            </div>
+          </div>
+          <!-- /.panel-body -->
+      </div>
+      <!-- /.panel -->
+  </div>
+  <!-- /.col-lg-12 -->
+</div>
+{% endblock %}
+
+{%block loader_javascript %}
+
+{% endblock %}

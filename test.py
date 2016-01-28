@@ -9,6 +9,7 @@
 from ApolloCommon.torrentparse import TorrentParser
 import glob,os
 from ApolloCommon.mongodb import MongoAgentFactory as Agent
+from ApolloCommon.torrentparse import TorrentParser
 
 # test_dir = os.path.join(os.getcwd(), './static/torrents2/')
 # for f in os.listdir(test_dir):
@@ -20,9 +21,12 @@ from ApolloCommon.mongodb import MongoAgentFactory as Agent
 #         print tp.get_tracker_url(), tp.get_creation_date(), tp.get_client_name(), tp.get_files_details()
 #     print '*' * 80
 
+_path = './static/torrents2/[SUBPIG][Marumo no Okite 2014 SP][720P].torrent'
+tp = TorrentParser(_path)
+print tp.is_torrent()
 
-db = Agent.getDB()
-print '##########'
-print db.find_one({'status':10})
+_path = './static/torrents2/[SUBPIG][Olympic no Minoshirokin Part 1].torrent'
+tp = TorrentParser(_path)
+print tp.is_torrent()
 
 #print Agent.getNoWarpDB().find_one({'years':2016})
