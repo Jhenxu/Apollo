@@ -78,7 +78,7 @@ class ApolloSpider(BaseSpider):
 
     def _store_spider_info(self):
         self.info['platform'] = self.name
-        self.info['lastime'] = time.time
+        self.info['lastime'] = time.time()
         if None == self.spider_item:
             Agent.getSpiderDB().insert(self.info)
             log.msg('更新SpiderItem.[%s]'%str(self.info),level=log.INFO)

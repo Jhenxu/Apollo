@@ -70,7 +70,11 @@ class TorrentPipeline(FilesPipeline):
             if os.path.exists(_path):
                 log.msg('种子下载完成:'+_file,level=log.INFO)
                 print _path
-                tp = TorrentParser(_path)
+                try:
+                    tp = TorrentParser(_path)
+                except Exception:
+                    tp = None
+                    log.msg('解析种子错误.'+traceback.format_exc(),level=log.ERROR)
                 if tp.is_torrent():
                     _key = 'torrents_downloaded'
                     info.spider.crawler.stats.inc_value(_key)
