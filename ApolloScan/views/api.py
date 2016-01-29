@@ -88,7 +88,7 @@ def getlog(request):
     return HttpResponse(htmldata, content_type="text/plain")
 
 def getUnactivation(request):
-    cursor = Agent.getNoWarpDB().find({'status':10},fields=['_id','title','torrents_size','platform','timestamp']).limit(20)
+    cursor = Agent.getNoWarpDB().find({'status':10},fields=['_id','title','torrents_size','platform','timestamp'])
     result = {}
     data = []
     if cursor:
