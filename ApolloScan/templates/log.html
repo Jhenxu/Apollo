@@ -124,7 +124,7 @@
 var t = $('#dataTables-example').DataTable({
     ajax: {
         //指定数据源
-        url: "../../scan/api/?action=loglist",
+        url: "../../scan/api/",
         data: {
             'action': 'loglist',
         },
@@ -200,7 +200,7 @@ function() {
 function showlog(file) {
   $('#frame_progress').show()
   $.ajax( {
-    url:'../../scan/api/?action=loglist',// 跳转到 action
+    url:'../../scan/api/',// 跳转到 action
     data: {
         'action': 'getlog',
         'file': file,

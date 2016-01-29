@@ -3,9 +3,12 @@
 {%block loader_header %}
 <!-- DataTables CSS -->
 <link href="../../static/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet">
+<link rel="stylesheet" href="../../static/alertify.js/themes/alertify.core.css" />
+<link rel="stylesheet" href="../../static/alertify.js/themes/alertify.default.css" id="toggleCSS" />
 <script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
 <script src="../../static/bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
 <script src="../../static/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js"></script>
+<script src="../../static/alertify.js/lib/alertify.min.js"></script>
 {% endblock %}
 
 {%block loader_content %}
@@ -31,13 +34,11 @@
                    <thead>
                     <tr role="row">
                         <th></th>
+                        <th>Title</th>
                         <th>Time</th>
-                        <th>Duration</th>
-                        <th>I/U</th>
-                        <th>Platform</th>
-                        <th>Size</th>
-                        <th>Status</th>
-                        <th>File</th>
+                        <th>Torrents</th>
+                        <th>Input</th>
+                        <th>Active</th>
                     </tr>
                    </thead>
                    <tbody></tbody>
@@ -57,5 +58,115 @@
 {% endblock %}
 
 {%block loader_javascript %}
+
+<script type="text/javascript">
+/*Javascript代码片段*/
+var table = $('#dataTables-example').DataTable({
+    ajax: {
+        //指定数据源
+        url: "../../scan/api/",
+        data: {
+            'action': 'unactivation',
+        },
+    },
+    //每页显示三条数据
+    pageLength: 10,
+    columns: [{
+        "data": null //此列不绑定数据源，用来显示序号
+    },
+    {
+        "data": "title"
+    },
+    {
+        "data": "timestamp"
+    },
+    {
+        "data": "tz"
+    },
+    {
+        "data": "input"
+    },
+    {
+        "data": "mid"
+    }],
+    "lengthMenu": [[10, 20, 30, 50, -1], [10, 20, 30, 50, "All"]],
+    "columnDefs": [{
+         //"visible": false,
+         //"targets": 0
+    },
+    {
+        "render": function(data, type, row, meta) {
+            return '<input value="'+row.input+'" id="input_'+meta.row+'"/>'
+        },
+        "targets": 4
+    },
+    {
+        "render": function(data, type, row, meta) {
+            return '<button type="button" class="btn btn-primary btn-sm" onclick="javascript:active('+meta.row+',this);">active</button>'
+        },
+        "targets": 5
+    }]
+
+});
+
+//前台添加序号
+table.on('order.dt search.dt',
+function() {
+    table.column(0, {
+        "search": 'applied',
+        "order": 'applied'
+    }).nodes().each(function(cell, i) {
+        cell.innerHTML = i + 1;
+    });
+}).draw();
+
+function reset () {
+  $("#toggleCSS").attr("href", "../../static/alertify.js/themes/alertify.default.css");
+  alertify.set({
+    labels : {
+      ok     : "OK",
+      cancel : "Cancel"
+    },
+    delay : 5000,
+    buttonReverse : false,
+    buttonFocus   : "ok"
+  });
+}
+
+function active(row,bt) {
+  reset();
+  title = $('#input_'+row).val();
+  data = table.row(row).data();
+  alertify.prompt("请确认设置的Title", function (e, str) {
+    if (e) {
+      bt.disabled = true;
+      $.ajax( {
+        url:'../../scan/api/',// 跳转到 action
+        data: {
+            'action': 'active',
+            'mid': data.mid,
+            'title':str,
+        },
+        async : true,
+        success:function(data) {
+          if (200 == data.status){
+            alertify.success("你成功激活: " + str);
+          }else{
+            bt.disabled = false;
+            alertify.error("激活失败了:" + data.status);
+          }
+        },
+        error : function() {
+          bt.disabled = false;
+          alertify.error("你取消了激活:" + str);
+        }
+        });
+    } else {
+      alertify.error("You've clicked Cancel");
+    }
+  }, title);
+  return false;
+};
+</script>
 
 {% endblock %}

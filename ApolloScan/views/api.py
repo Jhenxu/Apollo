@@ -9,9 +9,11 @@
 import json
 import os
 import re
+import time
 import datetime
 from django.http import HttpResponse
 from ApolloCommon.mongodb import MongoAgentFactory as Agent
+from bson.objectid import ObjectId
 
 def api_data(request):
     action = request.GET.get('action','')
@@ -21,6 +23,8 @@ def api_data(request):
         return loglist(request)
     elif 'unactivation' == action:
         return getUnactivation(request)
+    elif 'active' == action:
+        return active(request)
     return HttpResponse("No action.")
 
 def loglist(request):
@@ -84,7 +88,7 @@ def getlog(request):
     return HttpResponse(htmldata, content_type="text/plain")
 
 def getUnactivation(request):
-    cursor = Agent.getNoWarpDB().find({'status':10},fields=['_id','title','torrents_size'])
+    cursor = Agent.getNoWarpDB().find({'status':10},fields=['_id','title','torrents_size','platform','timestamp']).limit(20)
     result = {}
     data = []
     if cursor:
@@ -93,6 +97,31 @@ def getUnactivation(request):
             item['mid'] = str(i['_id'])
             item['title'] = i['title']
             item['tz'] = i['torrents_size']
+            item['timestamp'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(i['timestamp']))
+            if 'Suppig' == i['platform']:
+                _regex_title_group = r'\[(?P<y>\d\d\d\d)(?P<tag>.*?)\]\[(?P<title>.*?)\]'
+                match = re.search(_regex_title_group,i['title'])
+                if match:
+                    title = match.group('title')
+                    title = title.split(' ')[0]
+                    item['input'] = title
             data.append(item)
     result['data'] = data
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+def active(request):
+    mid = request.GET.get('mid','')
+    title = request.GET.get('title','')
+    result = {}
+    if '' == mid or '' == title:
+        result['status'] = 500
+    else:
+        data = {}
+        data['title'] = title
+        data['status'] = 0
+        r = Agent.getNoWarpDB().update({'_id':ObjectId(mid)},{'$set':data})
+        if r:
+            result['status'] = 200
+        else:
+            result['status'] = 401
     return HttpResponse(json.dumps(result), content_type="application/json")

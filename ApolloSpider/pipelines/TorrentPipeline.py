@@ -83,7 +83,7 @@ class TorrentPipeline(FilesPipeline):
                     _key = 'torrents_checkdown_failed'
                     info.spider.crawler.stats.inc_value(_key)
                     os.remove(_path)
-                    log.msg('下载完成，但种子校验失败:[%s][%s]'%(_file,_info['url']),level=log.ERROR)
+                    log.msg('下载完成，但种子校验失败:[%s][%s]'%(_file,_info['url']),level=log.WARNING)
         return item
 
     def media_to_download(self, request, info):
