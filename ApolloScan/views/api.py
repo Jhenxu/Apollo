@@ -119,6 +119,7 @@ def active(request):
         data = {}
         data['title'] = title
         data['status'] = 0
+        data['timestamp'] = time.time()
         r = Agent.getNoWarpDB().update({'_id':ObjectId(mid)},{'$set':data})
         if r:
             result['status'] = 200
