@@ -76,7 +76,7 @@ class TorrentPipeline(FilesPipeline):
                 except Exception:
                     tp = None
                     log.msg('解析种子错误.'+traceback.format_exc(),level=log.ERROR)
-                if tp.is_torrent():
+                if not tp == None and tp.is_torrent():
                     _key = 'torrents_downloaded'
                     info.spider.crawler.stats.inc_value(_key)
                     item['torrents'].append(_file)
