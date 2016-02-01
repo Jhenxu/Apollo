@@ -8,6 +8,7 @@
 #########################################################################
 import hashlib
 import os
+import traceback
 from ApolloSpider.utils import isFileExpire
 from ApolloSpider.pipelines import check_spider_pipeline
 from scrapy import log
