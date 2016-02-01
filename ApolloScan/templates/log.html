@@ -121,7 +121,7 @@
 
 <script type="text/javascript">
 /*Javascript代码片段*/
-var t = $('#dataTables-example').DataTable({
+var table = $('#dataTables-example').DataTable({
     ajax: {
         //指定数据源
         url: "../../scan/api/",
@@ -180,9 +180,9 @@ var t = $('#dataTables-example').DataTable({
 });
 
 //前台添加序号
-t.on('order.dt search.dt',
+table.on('order.dt search.dt',
 function() {
-    t.column(0, {
+    table.column(0, {
         "search": 'applied',
         "order": 'applied'
     }).nodes().each(function(cell, i) {
@@ -220,5 +220,17 @@ function showlog(file) {
     }
     });
 };
+
+
+$(window).load(function() {
+  if ($(window).width() < 400){
+    console.log('mobile');
+    table.column( 0 ).visible( false );
+    table.column( 2 ).visible( false );
+    table.column( 4 ).visible( false );
+    table.column( 5 ).visible( false );
+  }
+});
+
 </script>
 {% endblock %}
