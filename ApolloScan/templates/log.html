@@ -77,7 +77,6 @@
                         <th>Platform</th>
                         <th>Size</th>
                         <th>Status</th>
-                        <th>File</th>
                     </tr>
                    </thead>
                    <tbody></tbody>
@@ -151,9 +150,6 @@ var table = $('#dataTables-example').DataTable({
     },
     {
         "data": "log_error"
-    },
-    {
-        "data": "file"
     }],
     "lengthMenu": [[3, 6, 20, 50, -1], [3, 6, 20, 50, "All"]],
     "columnDefs": [{
@@ -163,18 +159,12 @@ var table = $('#dataTables-example').DataTable({
     {
         "render": function(data, type, row, meta) {
             if (row.log_error > 0){
-              return '<button type="button" class="btn btn-danger" disabled="disabled">Error ' +row.log_error+'</button>';
+              return '<button type="button" class="btn btn-danger" onclick="javascript:showlog(\''+row.file+'\');">Error ' +row.log_error+'</button>';
             }else{
-              return '<button type="button" class="btn btn-success" disabled="disabled">Success</button>'
+              return '<button type="button" class="btn btn-success" onclick="javascript:showlog(\''+row.file+'\');">Success</button>'
             }
         },
         "targets": 6
-    },
-    {
-        "render": function(data, type, row, meta) {
-            return '<button type="button" class="btn btn-primary btn-sm" onclick="javascript:showlog(\''+row.file+'\');">Scan</button>'
-        },
-        "targets": 7
     }]
 
 });
@@ -224,10 +214,8 @@ function showlog(file) {
 
 $(window).load(function() {
   if ($(window).width() < 400){
-    console.log('mobile');
     table.column( 0 ).visible( false );
     table.column( 2 ).visible( false );
-    table.column( 4 ).visible( false );
     table.column( 5 ).visible( false );
   }
 });
