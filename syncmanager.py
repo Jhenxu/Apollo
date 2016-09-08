@@ -15,9 +15,6 @@ from pymongo.connection import MongoClient
 from ApolloCommon.mongodb import MongoAgentFactory as Agent
 from ApolloCommon import config
 
-#nohup python atomcrawl.py >/dev/null 2>&1 &
-#ps -ef | awk '$9=="atomcrawl.py" {print $2}'
-
 def locale_douban_store():
     client = MongoClient('localhost',27017)
     db = client['apollo_db']['apollo_item']

@@ -8,7 +8,7 @@
 #########################################################################
 import json
 from django.http import HttpResponse
-from ApolloCards import card_method
+from ApolloCards import call_card
 from ApolloCommon.mongodb import MongoAgentFactory
 from bson.objectid import ObjectId
 
@@ -65,21 +65,25 @@ def _dispatch_action(request):
 
 def _homepage(request):
     result = {}
-    result['card_main_0001'] = card_method('card_main_0001')(page_count=5)
-    result['card_main_0005'] = card_method('card_main_0005')(page_count=5)
-    result['card_main_0002'] = card_method('card_main_0002')(page_count=5)
-    result['card_main_0003'] = card_method('card_main_0003')(page_count=5)
-    result['card_main_0004'] = card_method('card_main_0004')(page_count=5)
+    result['hasMore'] = False
+    result['sections'] = []
+    _cards = ('newest','action_movie','comedy_movie','drama_movie','top_movie')
+    for card in _cards:
+        _r = {}
+        _r['celltype'] = card
+        _r['modules'] = call_card(card)(page_count=5)
+        result['sections'].append(_r)
+
     return result
 
 def _test(request):
     _page = request.GET.get('page',1)
-    return card_method('card_main_0001')(page=_page)
+    return call_card('newest')(page=_page)
 
 def _test2(request):
     _page = request.GET.get('page',1)
-    return card_method('card_main_0005')(page=_page)
+    return call_card('top_movie')(page=_page)
 
 def _test3(request):
     _page = request.GET.get('page',1)
-    return card_method('card_main_0002')(page=_page)
+    return call_card('action_movie')(page=_page)

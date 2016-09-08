@@ -44,5 +44,3 @@ def job():
 
 if __name__=='__main__':
     scheduler()
-
-#nohup python atomcrawl.py >/dev/null 2>&1 &

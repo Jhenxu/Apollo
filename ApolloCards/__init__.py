@@ -12,23 +12,13 @@ from ApolloCommon import config,class_for_name
 from bson.objectid import ObjectId
 
 _app_cards_info = ('ApolloCards.managers','AppCardsManager')
-_cards_info = {
-    'card_main_0001':(_app_cards_info,'newest'),
-    'card_main_0002':(_app_cards_info,'action_movie'),
-    'card_main_0003':(_app_cards_info,'comedy_movie'),
-    'card_main_0004':(_app_cards_info,'drama_movie'),
-    'card_main_0005':(_app_cards_info,'top_movie'),
-    }
 
-def card_method(key):
-    if key in _cards_info:
-        t = _cards_info.get(key)
-        mod_name = t[0][0]
-        cls_name = t[0][1]
-        mgr = class_for_name(mod_name,cls_name)
-        fuc = t[1]
-        return getattr(mgr,fuc)
-    return None
+def call_card(key):
+    mod_name = _app_cards_info[0]
+    cls_name = _app_cards_info[1]
+    mgr = class_for_name(mod_name,cls_name)
+    fuc = key
+    return getattr(mgr,fuc)
 
 class BaseCardManager(object):
 
