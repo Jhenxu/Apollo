@@ -58,32 +58,36 @@ def _dispatch_action(request):
     action_command = {
         'homepage':_homepage(request),
         'test':_test(request),
-        'test2':_test2(request),
-        'test3':_test3(request),
+        'newest':_newest(request),
     }
     return (action in action_command),action_command.get(action,'')
 
 def _homepage(request):
     result = {}
-    result['hasMore'] = False
+    result['hasMore'] = True
     result['sections'] = []
-    _cards = ('newest','action_movie','comedy_movie','drama_movie','top_movie')
+    _cards = ('top_movie','action_movie','comedy_movie','drama_movie','sup_newest')
     for card in _cards:
         _r = {}
         _r['celltype'] = card
         _r['modules'] = call_card(card)(page_count=5)
         result['sections'].append(_r)
 
+    card = 'newest'
+    _r = {}
+    _r['celltype'] = card
+    _r['modules'] = call_card(card)(page=1)
+    result['sections'].append(_r)
+
+    return result
+
+def _newest(request):
+    _page = request.GET.get('page',1)
+    result = {}
+    result['hasMore'] = True
+    result['modules'] = call_card('newest')(page=_page)
     return result
 
 def _test(request):
     _page = request.GET.get('page',1)
-    return call_card('newest')(page=_page)
-
-def _test2(request):
-    _page = request.GET.get('page',1)
-    return call_card('top_movie')(page=_page)
-
-def _test3(request):
-    _page = request.GET.get('page',1)
-    return call_card('action_movie')(page=_page)
+    return call_card('sup_newest')(page=_page)

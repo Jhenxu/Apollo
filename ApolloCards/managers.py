@@ -15,7 +15,7 @@ class AppCardsManager(BaseCardManager):
 
     def newest(self,page=1,page_count=15):
         _skip = self.calculate_skip(page,page_count)
-        cursor = self.db.find({'platform':{'$ne':'Douban'}}).sort([('timestamp',-1)])\
+        cursor = self.db.find().sort([('timestamp',-1)])\
             .skip(_skip).limit(page_count)
         return self.assemble(cursor)
 
@@ -49,6 +49,12 @@ class AppCardsManager(BaseCardManager):
                 item['douban_detail'] = i
                 result.append(item)
         return self.assemble(result)
+
+    def sup_newest(self,page=1,page_count=15):
+        _skip = self.calculate_skip(page,page_count)
+        cursor = self.db.find({'platform':'Suppig'}).sort([('timestamp',-1)])\
+            .skip(_skip).limit(page_count)
+        return self.assemble(cursor)
 
     def jp_movie(self,page=1,page_count=15):
         _skip = self.calculate_skip(page,page_count)
