@@ -58,7 +58,7 @@ def _dispatch_action(request):
     action_command = {
         'homepage':_homepage(request),
         'test':_test(request),
-        'newest':_newest(request),
+        'list':_list(request),
     }
     return (action in action_command),action_command.get(action,'')
 
@@ -66,26 +66,38 @@ def _homepage(request):
     result = {}
     result['hasMore'] = True
     result['sections'] = []
+    result['tabs'] = _getTabs()
     _cards = ('top_movie','action_movie','comedy_movie','drama_movie','sup_newest')
     for card in _cards:
         _r = {}
         _r['celltype'] = card
-        _r['modules'] = call_card(card)(page_count=5)
+        _r['modules'] = call_card(card)(page_count=8)
         result['sections'].append(_r)
 
-    card = 'newest'
+    card = 'list'
     _r = {}
     _r['celltype'] = card
-    _r['modules'] = call_card(card)(page=1)
+    _r['modules'] = call_card('newest')(page=1)
     result['sections'].append(_r)
 
     return result
 
-def _newest(request):
+def _list(request):
     _page = request.GET.get('page',1)
+    _type = request.GET.get('type','')
     result = {}
     result['hasMore'] = True
-    result['modules'] = call_card('newest')(page=_page)
+    if '' != _type:
+        result['modules'] = call_card(_type)(page=_page)
+    return result
+
+def _getTabs():
+    result = []
+    result.append({'navName':'最新影视','action':'newest'})
+    result.append({'navName':'日剧','action':'sup_newest'})
+    result.append({'navName':'动作片','action':'action_movie'})
+    result.append({'navName':'剧情片','action':'drama_movie'})
+    result.append({'navName':'喜剧片','action':'comedy_movie'})
     return result
 
 def _test(request):
