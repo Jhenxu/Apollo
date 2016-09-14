@@ -40,11 +40,10 @@ def download(request):
         resp['msg'] = ''
         item = MongoAgentFactory.getDB().find_one({'_id':ObjectId(mid)})
         result = {}
-        if item:
-            result['torrents'] = item['torrents']
-        else:
-            result['torrents'] = []
-
+        result['torrents'] = []
+        for t in item['torrents']:
+            if len(t) > 0:
+                result['torrents'].append(t)            
         resp['data'] = result
     else:
         resp['status'] = 302
