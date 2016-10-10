@@ -38,7 +38,7 @@ def getDeltaSecs():
 
 def job():
     print bcolors.HEADER+('Start scrawl job..... %s' % time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(time.time()))))+bcolors.ENDC
-    command = 'scrapy crawl BTtiantang&&scrapy crawl Suppig&&scrapy crawl Douban'
+    command = 'scrapy crawl Suppig&&scrapy crawl Douban'
     subprocess.call(command,shell=True)
     print bcolors.OKBLUE+'Finish do command.'+bcolors.ENDC
 
