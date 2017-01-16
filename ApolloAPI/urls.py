@@ -11,5 +11,6 @@ api_group = [
         (r'^test$','test'),
         (r'^query$','query'),
         (r'^download$','download'),
+        (r'^fortune$','fortune'),
     ]
 urlpatterns = patterns('ApolloAPI.views.api',*api_group)

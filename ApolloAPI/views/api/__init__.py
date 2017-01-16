@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from ApolloCards import call_card
 from ApolloCommon.mongodb import MongoAgentFactory
 from bson.objectid import ObjectId
+from Fortune import today
 
 def test(request):
     resp = {}
@@ -43,13 +44,34 @@ def download(request):
         result['torrents'] = []
         for t in item['torrents']:
             if len(t) > 0:
-                result['torrents'].append(t)            
+                result['torrents'].append(t)
         resp['data'] = result
     else:
         resp['status'] = 302
         resp['msg'] = '无法获取mid'
         resp['data'] = {}
     return HttpResponse(json.dumps(resp), content_type="application/json")
+
+#http://127.0.0.1:8188/api/fortune?action=today
+def fortune(request):
+    isOK,result = _dispatch_fortune(request)
+    resp = {}
+    if isOK:
+        resp['status'] = 200
+        resp['msg'] = ''
+        resp['data'] = result
+    else:
+        resp['status'] = 301
+        resp['msg'] = '无法识别action'
+        resp['data'] = {}
+    return HttpResponse(json.dumps(resp,ensure_ascii=False), content_type="application/json")
+
+def _dispatch_fortune(request):
+    action = request.GET.get('action','')
+    action_command = {
+        'today':today(request),
+    }
+    return (action in action_command),action_command.get(action,'')
 
 
 def _dispatch_action(request):
