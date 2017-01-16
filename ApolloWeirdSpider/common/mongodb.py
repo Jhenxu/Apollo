@@ -7,7 +7,6 @@
 # Created Time: 2014-01-31 12:46:06
 #########################################################################
 import traceback
-import pymongo
 
 from scrapy import log
 from pymongo.connection import MongoClient
@@ -28,7 +27,7 @@ class MongoAgent(object):
 
             client = MongoClient(MONGODB_SERVER,MONGODB_PORT)
             self.colletcion = client[MONGODB_DB]
-            self.colletcion[config.get('MONGODB_ITEM','apollo_item')].ensure_index('key',unique=True)
+            self.colletcion[config.get('MONGODB_ITEM','apollo_fortune')].ensure_index('key',unique=True)
         except Exception as e:
             log.msg(str(e),level=log.ERROR)
             traceback.print_exc()
@@ -70,11 +69,3 @@ class MongoAgentFactory(object):
     @staticmethod
     def getNoWarpDB():
         return MongoAgent().colletcion[config.get('MONGODB_ITEM')]
-
-    @staticmethod
-    def getLogDB():
-        return MongoAgent().colletcion[config.get('MONGODB_LOG')]
-
-    @staticmethod
-    def getSpiderDB():
-        return MongoAgent().colletcion[config.get('MONGODB_SPIDER')]
